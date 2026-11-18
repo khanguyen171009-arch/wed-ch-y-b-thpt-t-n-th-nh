@@ -1,0 +1,1972 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VinaRun Club - Cộng Đồng Chạy Bộ & Tích Điểm</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            orange: '#FF5A1F',
+                            orangeDark: '#E04810',
+                            navy: '#0F172A',
+                            navyLight: '#1E293B',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F8FAFC;
+        }
+        .fade-in {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="text-slate-800 antialiased min-h-screen flex flex-col">
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="fixed top-4 right-4 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none px-4 sm:px-0"></div>
+
+    <!-- Custom Modal Container -->
+    <div id="custom-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 fade-in">
+            <div class="flex items-center justify-between mb-4">
+                <h3 id="modal-title" class="text-lg font-bold text-slate-900">Xác nhận</h3>
+                <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600 p-1 rounded-lg">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+            <div id="modal-body" class="text-slate-600 text-sm mb-6"></div>
+            <div id="modal-actions" class="flex justify-end gap-3"></div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="fixed inset-0 bg-slate-900 text-white z-40 flex flex-col items-center justify-center">
+        <div class="w-16 h-16 border-4 border-brand-orange border-t-transparent rounded-full animate-spin mb-4"></div>
+        <div class="flex items-center gap-2 text-xl font-bold">
+            <i class="fa-solid fa-person-running text-brand-orange"></i>
+            <span>VinaRun Club</span>
+        </div>
+        <p class="text-slate-400 text-sm mt-2">Đang đồng bộ dữ liệu câu lạc bộ...</p>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- VIEW 1: AUTHENTICATION SCREEN (LOGIN/SIGNUP) -->
+    <!-- ========================================== -->
+    <div id="auth-screen" class="hidden min-h-screen flex-1 flex flex-col lg:flex-row bg-white">
+        <!-- Left Banner (Sporty Hero) -->
+        <div class="lg:w-5/12 bg-slate-900 text-white p-8 lg:p-12 flex flex-col justify-between relative overflow-hidden">
+            <div class="absolute -right-16 -bottom-16 opacity-10 pointer-events-none">
+                <i class="fa-solid fa-person-running text-[320px] text-brand-orange"></i>
+            </div>
+            
+            <div class="relative z-10">
+                <div class="inline-flex items-center gap-3 bg-white/10 backdrop-blur-md px-4 py-2 rounded-full mb-8">
+                    <i class="fa-solid fa-fire text-brand-orange"></i>
+                    <span class="text-xs font-semibold tracking-wider uppercase">Cộng Đồng Chạy Bộ Việt Nam</span>
+                </div>
+                <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold leading-tight mb-4">
+                    Chinh phục từng bước chạy, <span class="text-brand-orange">tích điểm đổi quà!</span>
+                </h1>
+                <p class="text-slate-300 text-base sm:text-lg leading-relaxed max-w-md">
+                    Điểm danh mỗi ngày, ghi lại thành tích chạy bộ, leo bảng xếp hạng và nhận hàng ngàn phần quà hấp dẫn từ câu lạc bộ.
+                </p>
+            </div>
+
+            <div class="relative z-10 mt-8 pt-8 border-t border-slate-800 grid grid-cols-3 gap-4">
+                <div>
+                    <div class="text-2xl font-bold text-brand-orange">+10đ</div>
+                    <div class="text-xs text-slate-400">Điểm danh mỗi ngày</div>
+                </div>
+                <div>
+                    <div class="text-2xl font-bold text-brand-orange">+5đ/km</div>
+                    <div class="text-xs text-slate-400">Tích lũy quãng đường</div>
+                </div>
+                <div>
+                    <div class="text-2xl font-bold text-brand-orange">100%</div>
+                    <div class="text-xs text-slate-400">Miễn phí tham gia</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Form Area -->
+        <div class="lg:w-7/12 flex items-center justify-center p-6 sm:p-12 bg-slate-50">
+            <div class="w-full max-w-md bg-white rounded-3xl shadow-xl border border-slate-100 p-6 sm:p-8">
+                <!-- Logo Header -->
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-11 h-11 rounded-2xl bg-brand-orange text-white flex items-center justify-center text-xl shadow-lg shadow-orange-500/30">
+                        <i class="fa-solid fa-person-running"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-xl font-extrabold text-slate-900">VinaRun Club</h2>
+                        <p class="text-xs text-slate-500">Đăng nhập để bắt đầu hành trình</p>
+                    </div>
+                </div>
+
+                <!-- Tab Switcher -->
+                <div class="grid grid-cols-2 bg-slate-100 p-1 rounded-xl mb-6">
+                    <button type="button" id="tab-login-btn" onclick="switchAuthTab('login')" class="py-2.5 text-sm font-semibold rounded-lg bg-white text-slate-900 shadow-sm transition">
+                        Đăng nhập
+                    </button>
+                    <button type="button" id="tab-register-btn" onclick="switchAuthTab('register')" class="py-2.5 text-sm font-semibold rounded-lg text-slate-500 hover:text-slate-900 transition">
+                        Đăng ký mới
+                    </button>
+                </div>
+
+                <!-- LOGIN FORM -->
+                <form id="login-form" onsubmit="handleLogin(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Email đăng nhập</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400">
+                                <i class="fa-solid fa-envelope"></i>
+                            </span>
+                            <input type="email" id="login-email" required placeholder="runner@vinarun.vn" class="w-full pl-10 pr-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-orange focus:border-brand-orange outline-none transition">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Mật khẩu</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400">
+                                <i class="fa-solid fa-lock"></i>
+                            </span>
+                            <input type="password" id="login-password" required placeholder="••••••••" class="w-full pl-10 pr-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-orange focus:border-brand-orange outline-none transition">
+                        </div>
+                    </div>
+                    <button type="submit" class="w-full py-3 bg-brand-orange hover:bg-brand-orangeDark text-white font-bold rounded-xl shadow-lg shadow-orange-500/30 transition flex items-center justify-center gap-2">
+                        <span>Đăng nhập vào CLB</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </form>
+
+                <!-- REGISTER FORM -->
+                <form id="register-form" onsubmit="handleRegister(event)" class="space-y-3.5 hidden">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Họ và tên <span class="text-red-500">*</span></label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400">
+                                <i class="fa-solid fa-user"></i>
+                            </span>
+                            <input type="text" id="reg-name" required placeholder="Nguyễn Văn A" class="w-full pl-10 pr-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-orange focus:border-brand-orange outline-none transition">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Lớp <span class="text-red-500">*</span></label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400">
+                                    <i class="fa-solid fa-graduation-cap"></i>
+                                </span>
+                                <input type="text" id="reg-class" required placeholder="VD: 12A1, K65-CNTT" class="w-full pl-10 pr-3 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-orange focus:border-brand-orange outline-none transition">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Số điện thoại <span class="text-red-500">*</span></label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400">
+                                    <i class="fa-solid fa-phone"></i>
+                                </span>
+                                <input type="tel" id="reg-phone" required pattern="[0-9]{9,11}" title="Nhập số điện thoại từ 9 đến 11 chữ số" placeholder="0912345678" class="w-full pl-10 pr-3 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-orange focus:border-brand-orange outline-none transition">
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Email <span class="text-red-500">*</span></label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400">
+                                <i class="fa-solid fa-envelope"></i>
+                            </span>
+                            <input type="email" id="reg-email" required placeholder="email@example.com" class="w-full pl-10 pr-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-orange focus:border-brand-orange outline-none transition">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Mật khẩu <span class="text-red-500">*</span></label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400">
+                                <i class="fa-solid fa-lock"></i>
+                            </span>
+                            <input type="password" id="reg-password" required minlength="4" placeholder="Tối thiểu 4 ký tự" class="w-full pl-10 pr-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-orange focus:border-brand-orange outline-none transition">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">
+                            Mã bí mật Quản trị viên <span class="text-xs text-slate-400 font-normal">(Tùy chọn)</span>
+                        </label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400">
+                                <i class="fa-solid fa-shield-halved"></i>
+                            </span>
+                            <input type="text" id="reg-admin-code" placeholder="Nhập ADMIN2026 để làm Quản trị viên" class="w-full pl-10 pr-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-orange focus:border-brand-orange outline-none transition">
+                        </div>
+                        <p class="text-[11px] text-slate-500 mt-1">
+                            <i class="fa-solid fa-circle-info text-brand-orange"></i> Tài khoản đầu tiên đăng ký hoặc nhập mã <strong class="text-slate-700">ADMIN2026</strong> sẽ tự động có quyền Quản trị viên.
+                        </p>
+                    </div>
+                    <button type="submit" class="w-full py-3 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl shadow-lg transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-user-plus"></i>
+                        <span>Tạo tài khoản & Tham gia</span>
+                    </button>
+                </form>
+
+                <!-- Quick Demo Login Box -->
+                <div class="mt-6 pt-5 border-t border-slate-100">
+                    <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider text-center mb-3">Trải nghiệm nhanh (1 chạm)</p>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                        <button type="button" onclick="quickDemoLogin('admin')" class="py-2.5 px-3 bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-900 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-crown text-amber-500"></i>
+                            <span>Vào quyền Quản trị viên</span>
+                        </button>
+                        <button type="button" onclick="quickDemoLogin('runner')" class="py-2.5 px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-person-running text-brand-orange"></i>
+                            <span>Vào quyền Thành viên</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- VIEW 2: MAIN APPLICATION DASHBOARD         -->
+    <!-- ========================================== -->
+    <div id="app-screen" class="hidden flex-1 flex flex-col">
+        <!-- Top Navigation Bar -->
+        <header class="bg-slate-900 text-white sticky top-0 z-30 shadow-md">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+                <!-- Brand -->
+                <div class="flex items-center gap-3 cursor-pointer" onclick="switchNav('dashboard')">
+                    <div class="w-10 h-10 rounded-xl bg-brand-orange flex items-center justify-center text-white text-lg shadow-md">
+                        <i class="fa-solid fa-person-running"></i>
+                    </div>
+                    <div>
+                        <span class="font-extrabold text-lg tracking-tight">VinaRun <span class="text-brand-orange">Club</span></span>
+                        <span id="header-admin-badge" class="hidden ml-2 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-amber-500 text-slate-950 rounded-full">
+                            <i class="fa-solid fa-crown mr-1"></i>Quản trị viên
+                        </span>
+                    </div>
+                </div>
+
+                <!-- User Points & Logout -->
+                <div class="flex items-center gap-3 sm:gap-5">
+                    <div class="flex items-center gap-2 bg-slate-800 px-3 py-1.5 rounded-full border border-slate-700">
+                        <i class="fa-solid fa-coins text-amber-400"></i>
+                        <span id="nav-user-points" class="font-bold text-sm text-amber-400">0</span>
+                        <span class="text-xs text-slate-400 hidden sm:inline">điểm</span>
+                    </div>
+
+                    <div class="flex items-center gap-2.5">
+                        <div class="text-right hidden md:block">
+                            <div id="nav-user-name" class="text-sm font-bold leading-none">Runner</div>
+                            <div id="nav-user-role-text" class="text-[11px] text-slate-400 mt-1">Lớp • SĐT</div>
+                        </div>
+                        <button onclick="handleLogout()" title="Đăng xuất" class="p-2.5 bg-slate-800 hover:bg-red-500/20 hover:text-red-400 text-slate-300 rounded-xl transition">
+                            <i class="fa-solid fa-right-from-bracket"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sub-navigation Tabs (Scrollable on Mobile) -->
+            <div class="bg-slate-800/80 border-t border-slate-700/80">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex overflow-x-auto no-scrollbar gap-1 py-1.5">
+                    <button onclick="switchNav('dashboard')" id="nav-btn-dashboard" class="nav-tab px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap flex items-center gap-2 bg-brand-orange text-white transition">
+                        <i class="fa-solid fa-house"></i>
+                        <span>Trang chủ & Điểm danh</span>
+                    </button>
+                    <button onclick="switchNav('leaderboard')" id="nav-btn-leaderboard" class="nav-tab px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap flex items-center gap-2 text-slate-300 hover:bg-slate-700/60 transition">
+                        <i class="fa-solid fa-trophy"></i>
+                        <span>Bảng xếp hạng</span>
+                    </button>
+                    <button onclick="switchNav('rewards')" id="nav-btn-rewards" class="nav-tab px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap flex items-center gap-2 text-slate-300 hover:bg-slate-700/60 transition">
+                        <i class="fa-solid fa-gift"></i>
+                        <span>Đổi quà</span>
+                    </button>
+                    <button onclick="switchNav('history')" id="nav-btn-history" class="nav-tab px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap flex items-center gap-2 text-slate-300 hover:bg-slate-700/60 transition">
+                        <i class="fa-solid fa-id-card"></i>
+                        <span>Hồ sơ & Lịch sử</span>
+                    </button>
+                    <!-- Admin Only Tab -->
+                    <button onclick="switchNav('admin')" id="nav-btn-admin" class="hidden nav-tab px-4 py-2 rounded-xl text-sm font-bold whitespace-nowrap flex items-center gap-2 text-amber-400 hover:bg-amber-500/20 border border-amber-500/30 ml-auto transition">
+                        <i class="fa-solid fa-shield-halved"></i>
+                        <span>Quản lý hệ thống (Admin)</span>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+
+            <!-- ==================================== -->
+            <!-- TAB 1: DASHBOARD (CHECK-IN & LOG RUN)-->
+            <!-- ==================================== -->
+            <section id="section-dashboard" class="space-y-6 fade-in">
+                <!-- Welcome & Daily Check-in Banner -->
+                <div class="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 rounded-3xl p-6 sm:p-8 text-white shadow-xl relative overflow-hidden">
+                    <div class="absolute right-0 top-0 bottom-0 opacity-10 pointer-events-none flex items-center pr-6">
+                        <i class="fa-solid fa-calendar-check text-[180px] text-brand-orange"></i>
+                    </div>
+                    <div class="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+                        <div>
+                            <div class="flex flex-wrap items-center gap-2 mb-3">
+                                <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-500/20 text-brand-orange text-xs font-bold">
+                                    <i class="fa-solid fa-fire"></i>
+                                    <span>Chuỗi điểm danh: <span id="dash-streak">0</span> ngày liên tiếp</span>
+                                </span>
+                                <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-slate-200 text-xs font-semibold">
+                                    <i class="fa-solid fa-graduation-cap text-brand-orange"></i>
+                                    <span id="dash-user-class">Lớp: --</span>
+                                    <span class="text-slate-500">|</span>
+                                    <i class="fa-solid fa-phone text-emerald-400"></i>
+                                    <span id="dash-user-phone">--</span>
+                                </span>
+                            </div>
+                            <h1 class="text-2xl sm:text-3xl font-extrabold">Xin chào, <span id="dash-greeting-name" class="text-brand-orange">Runner</span>!</h1>
+                            <p class="text-slate-300 text-sm sm:text-base mt-1 max-w-xl">
+                                Đừng quên điểm danh mỗi ngày để nhận ngay <strong>+10 điểm</strong> và ghi lại buổi chạy của bạn để tích lũy thêm <strong>+5 điểm/km</strong>!
+                            </p>
+                        </div>
+
+                        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 shrink-0">
+                            <button id="btn-daily-checkin" onclick="handleDailyCheckin()" class="px-6 py-4 bg-brand-orange hover:bg-brand-orangeDark text-white font-extrabold rounded-2xl shadow-lg shadow-orange-500/30 transition flex items-center justify-center gap-3 text-base">
+                                <i class="fa-solid fa-calendar-check text-xl"></i>
+                                <div class="text-left">
+                                    <div id="checkin-btn-title">Điểm danh hôm nay</div>
+                                    <div id="checkin-btn-sub" class="text-xs font-normal text-orange-100">Nhận ngay +10 điểm</div>
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Personal Stats Grid -->
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs font-semibold text-slate-400 uppercase">Điểm tích lũy</span>
+                            <div class="w-8 h-8 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center">
+                                <i class="fa-solid fa-coins"></i>
+                            </div>
+                        </div>
+                        <div id="stat-points" class="text-2xl sm:text-3xl font-extrabold text-slate-900">0</div>
+                        <div class="text-xs text-slate-500 mt-1">Dùng để đổi quà CLB</div>
+                    </div>
+
+                    <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs font-semibold text-slate-400 uppercase">Tổng quãng đường</span>
+                            <div class="w-8 h-8 rounded-xl bg-orange-100 text-brand-orange flex items-center justify-center">
+                                <i class="fa-solid fa-route"></i>
+                            </div>
+                        </div>
+                        <div class="text-2xl sm:text-3xl font-extrabold text-slate-900"><span id="stat-km">0.0</span> <span class="text-base font-semibold text-slate-400">km</span></div>
+                        <div class="text-xs text-slate-500 mt-1">Tích lũy toàn thời gian</div>
+                    </div>
+
+                    <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs font-semibold text-slate-400 uppercase">Số buổi chạy</span>
+                            <div class="w-8 h-8 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center">
+                                <i class="fa-solid fa-shoe-prints"></i>
+                            </div>
+                        </div>
+                        <div id="stat-runs-count" class="text-2xl sm:text-3xl font-extrabold text-slate-900">0</div>
+                        <div class="text-xs text-slate-500 mt-1">Buổi chạy đã ghi nhận</div>
+                    </div>
+
+                    <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs font-semibold text-slate-400 uppercase">Chuỗi điểm danh</span>
+                            <div class="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center">
+                                <i class="fa-solid fa-fire-flame-curved"></i>
+                            </div>
+                        </div>
+                        <div class="text-2xl sm:text-3xl font-extrabold text-slate-900"><span id="stat-streak">0</span> <span class="text-base font-semibold text-slate-400">ngày</span></div>
+                        <div class="text-xs text-slate-500 mt-1">Điểm danh liên tục</div>
+                    </div>
+                </div>
+
+                <!-- Log Run Form & Recent Club Feed -->
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                    <!-- Log Run Form (5 cols) -->
+                    <div class="lg:col-span-5 bg-white rounded-3xl border border-slate-100 shadow-sm p-6">
+                        <div class="flex items-center gap-3 mb-5">
+                            <div class="w-10 h-10 rounded-xl bg-orange-100 text-brand-orange flex items-center justify-center text-lg">
+                                <i class="fa-solid fa-stopwatch"></i>
+                            </div>
+                            <div>
+                                <h2 class="text-lg font-bold text-slate-900">Ghi nhận buổi chạy mới</h2>
+                                <p class="text-xs text-slate-500">Nhận ngay 5 điểm cho mỗi 1 km hoàn thành</p>
+                            </div>
+                        </div>
+
+                        <form onsubmit="handleLogRun(event)" class="space-y-4">
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Quãng đường (km)</label>
+                                    <input type="number" id="run-distance" step="0.1" min="0.5" max="100" required oninput="updatePacePreview()" placeholder="VD: 5.0" class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-orange outline-none font-bold text-slate-900">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Thời gian (phút)</label>
+                                    <input type="number" id="run-duration" min="1" max="1000" required oninput="updatePacePreview()" placeholder="VD: 30" class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-orange outline-none font-bold text-slate-900">
+                                </div>
+                            </div>
+
+                            <!-- Live Pace & Points Preview Box -->
+                            <div class="bg-slate-50 rounded-2xl p-3.5 border border-slate-200/70 flex items-center justify-between">
+                                <div>
+                                    <div class="text-[11px] text-slate-500 font-medium">Tốc độ TB (Pace)</div>
+                                    <div id="preview-pace" class="text-base font-extrabold text-slate-800">--:-- /km</div>
+                                </div>
+                                <div class="text-right">
+                                    <div class="text-[11px] text-slate-500 font-medium">Điểm thưởng dự kiến</div>
+                                    <div id="preview-points" class="text-base font-extrabold text-brand-orange">+0 điểm</div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Cảm xúc / Ghi chú buổi chạy</label>
+                                <input type="text" id="run-note" placeholder="VD: Chạy sáng sớm công viên, thời tiết mát mẻ!" class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-orange outline-none text-sm">
+                            </div>
+
+                            <button type="submit" class="w-full py-3 bg-slate-900 hover:bg-brand-orange text-white font-bold rounded-xl shadow-md transition flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-circle-plus"></i>
+                                <span>Lưu thành tích & Nhận điểm</span>
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Club Live Feed (7 cols) -->
+                    <div class="lg:col-span-7 bg-white rounded-3xl border border-slate-100 shadow-sm p-6 flex flex-col">
+                        <div class="flex items-center justify-between mb-5">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center text-lg">
+                                    <i class="fa-solid fa-bolt"></i>
+                                </div>
+                                <div>
+                                    <h2 class="text-lg font-bold text-slate-900">Hoạt động mới nhất của CLB</h2>
+                                    <p class="text-xs text-slate-500">Cập nhật trực tiếp từ các thành viên</p>
+                                </div>
+                            </div>
+                            <span class="text-xs font-semibold px-2.5 py-1 bg-emerald-50 text-emerald-600 rounded-full flex items-center gap-1.5">
+                                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span> Trực tuyến
+                            </span>
+                        </div>
+
+                        <div id="club-feed-list" class="space-y-3 overflow-y-auto max-h-[380px] pr-1">
+                            <!-- Feed items injected via JS -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ==================================== -->
+            <!-- TAB 2: LEADERBOARD                   -->
+            <!-- ==================================== -->
+            <section id="section-leaderboard" class="hidden space-y-6 fade-in">
+                <div class="bg-white rounded-3xl border border-slate-100 shadow-sm p-6 sm:p-8">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                        <div>
+                            <h2 class="text-2xl font-extrabold text-slate-900 flex items-center gap-2.5">
+                                <i class="fa-solid fa-trophy text-amber-500"></i>
+                                <span>Bảng Xếp Hạng VinaRun Club</span>
+                            </h2>
+                            <p class="text-sm text-slate-500 mt-1">Vinh danh những chiến binh chăm chỉ nhất câu lạc bộ</p>
+                        </div>
+                        <div class="inline-flex bg-slate-100 p-1 rounded-xl">
+                            <button onclick="setLeaderboardSort('points')" id="lb-sort-points" class="px-4 py-2 rounded-lg text-xs font-bold bg-white text-slate-900 shadow-sm transition">
+                                Xếp theo Điểm
+                            </button>
+                            <button onclick="setLeaderboardSort('km')" id="lb-sort-km" class="px-4 py-2 rounded-lg text-xs font-bold text-slate-500 hover:text-slate-900 transition">
+                                Xếp theo Số Km
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Top 3 Podium Cards -->
+                    <div id="leaderboard-podium" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                        <!-- Top 3 injected via JS -->
+                    </div>
+
+                    <!-- Full Ranking Table -->
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="border-b border-slate-200 text-xs font-bold text-slate-400 uppercase">
+                                    <th class="py-3 px-4">Hạng</th>
+                                    <th class="py-3 px-4">Thành viên & Lớp</th>
+                                    <th class="py-3 px-4 text-right">Tổng Km</th>
+                                    <th class="py-3 px-4 text-right">Chuỗi điểm danh</th>
+                                    <th class="py-3 px-4 text-right">Tổng điểm</th>
+                                </tr>
+                            </thead>
+                            <tbody id="leaderboard-table-body" class="divide-y divide-slate-100 text-sm">
+                                <!-- Rows injected via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ==================================== -->
+            <!-- TAB 4: PERSONAL PROFILE & HISTORY    -->
+            <!-- ==================================== -->
+            <section id="section-history" class="hidden space-y-6 fade-in">
+                <!-- Personal Profile Card -->
+                <div class="bg-white rounded-3xl border border-slate-100 shadow-sm p-6 sm:p-8">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-100">
+                        <div class="flex items-center gap-4">
+                            <div id="profile-avatar" class="w-16 h-16 rounded-2xl bg-slate-900 text-white text-2xl font-extrabold flex items-center justify-center shadow-md shrink-0">
+                                R
+                            </div>
+                            <div>
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    <h2 id="profile-name" class="text-xl sm:text-2xl font-extrabold text-slate-900">Họ và tên</h2>
+                                    <span id="profile-role-badge" class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-slate-100 text-slate-700">Thành viên</span>
+                                </div>
+                                <p id="profile-email" class="text-sm text-slate-500 mt-0.5">email@example.com</p>
+                            </div>
+                        </div>
+                        <button onclick="openEditProfileModal()" class="px-4 py-2.5 bg-slate-900 hover:bg-brand-orange text-white text-xs sm:text-sm font-bold rounded-xl transition flex items-center gap-2 self-start sm:self-center">
+                            <i class="fa-solid fa-pen-to-square"></i>
+                            <span>Cập nhật thông tin cá nhân</span>
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-6">
+                        <div class="p-4 rounded-2xl bg-slate-50 border border-slate-100">
+                            <div class="text-xs font-semibold text-slate-400 uppercase flex items-center gap-1.5">
+                                <i class="fa-solid fa-user text-brand-orange"></i> Họ và tên
+                            </div>
+                            <div id="profile-detail-name" class="text-base font-extrabold text-slate-900 mt-1">--</div>
+                        </div>
+                        <div class="p-4 rounded-2xl bg-slate-50 border border-slate-100">
+                            <div class="text-xs font-semibold text-slate-400 uppercase flex items-center gap-1.5">
+                                <i class="fa-solid fa-graduation-cap text-blue-600"></i> Lớp / Đơn vị
+                            </div>
+                            <div id="profile-detail-class" class="text-base font-extrabold text-slate-900 mt-1">--</div>
+                        </div>
+                        <div class="p-4 rounded-2xl bg-slate-50 border border-slate-100">
+                            <div class="text-xs font-semibold text-slate-400 uppercase flex items-center gap-1.5">
+                                <i class="fa-solid fa-phone text-emerald-600"></i> Số điện thoại
+                            </div>
+                            <div id="profile-detail-phone" class="text-base font-extrabold text-slate-900 mt-1">--</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- My Runs History -->
+                    <div class="bg-white rounded-3xl border border-slate-100 shadow-sm p-6">
+                        <h3 class="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+                            <i class="fa-solid fa-person-running text-brand-orange"></i>
+                            <span>Lịch sử chạy bộ</span>
+                        </h3>
+                        <div id="my-runs-list" class="space-y-3 max-h-[450px] overflow-y-auto pr-1"></div>
+                    </div>
+
+                    <!-- My Check-in History -->
+                    <div class="bg-white rounded-3xl border border-slate-100 shadow-sm p-6">
+                        <h3 class="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+                            <i class="fa-solid fa-calendar-check text-emerald-500"></i>
+                            <span>Lịch sử điểm danh</span>
+                        </h3>
+                        <div id="my-checkins-list" class="space-y-3 max-h-[450px] overflow-y-auto pr-1"></div>
+                    </div>
+
+                    <!-- My Redemptions History -->
+                    <div class="bg-white rounded-3xl border border-slate-100 shadow-sm p-6">
+                        <h3 class="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+                            <i class="fa-solid fa-bag-shopping text-purple-500"></i>
+                            <span>Lịch sử đổi quà</span>
+                        </h3>
+                        <div id="my-redemptions-list" class="space-y-3 max-h-[450px] overflow-y-auto pr-1"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ==================================== -->
+            <!-- TAB 5: ADMIN DASHBOARD               -->
+            <!-- ==================================== -->
+            <section id="section-admin" class="hidden space-y-6 fade-in">
+                <!-- Admin Header & Overview Stats -->
+                <div class="bg-slate-900 text-white rounded-3xl p-6 sm:p-8 shadow-xl">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                        <div>
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/20 text-amber-400 text-xs font-bold mb-2">
+                                <i class="fa-solid fa-crown"></i>
+                                <span>Khu Vực Quản Trị Viên Hệ Thống</span>
+                            </div>
+                            <h2 class="text-2xl sm:text-3xl font-extrabold">Bảng Điều Khiển Quản Trị</h2>
+                        </div>
+                        <button onclick="seedSampleData(true)" class="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-xs font-bold rounded-xl border border-slate-700 transition flex items-center gap-2 self-start">
+                            <i class="fa-solid fa-wand-magic-sparkles text-amber-400"></i>
+                            <span>Tạo thêm dữ liệu mẫu</span>
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div class="bg-slate-800/80 border border-slate-700 p-4 rounded-2xl">
+                            <div class="text-xs text-slate-400">Tổng thành viên</div>
+                            <div id="admin-stat-users" class="text-2xl font-extrabold text-white mt-1">0</div>
+                        </div>
+                        <div class="bg-slate-800/80 border border-slate-700 p-4 rounded-2xl">
+                            <div class="text-xs text-slate-400">Tổng Km toàn CLB</div>
+                            <div class="text-2xl font-extrabold text-brand-orange mt-1"><span id="admin-stat-km">0.0</span> km</div>
+                        </div>
+                        <div class="bg-slate-800/80 border border-slate-700 p-4 rounded-2xl">
+                            <div class="text-xs text-slate-400">Tổng điểm lưu hành</div>
+                            <div id="admin-stat-points" class="text-2xl font-extrabold text-amber-400 mt-1">0</div>
+                        </div>
+                        <div class="bg-slate-800/80 border border-slate-700 p-4 rounded-2xl">
+                            <div class="text-xs text-slate-400">Yêu cầu đổi quà chờ duyệt</div>
+                            <div id="admin-stat-pending" class="text-2xl font-extrabold text-emerald-400 mt-1">0</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Admin Sub-tabs -->
+                <div class="flex flex-wrap gap-2 bg-white p-2 rounded-2xl border border-slate-200/80 shadow-sm">
+                    <button onclick="switchAdminSubTab('users')" id="admin-sub-btn-users" class="admin-sub-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-bold bg-slate-900 text-white transition">
+                        <i class="fa-solid fa-users mr-1.5"></i>Quản lý Thành viên
+                    </button>
+                    <button onclick="switchAdminSubTab('rewards')" id="admin-sub-btn-rewards" class="admin-sub-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-bold text-slate-600 hover:bg-slate-100 transition">
+                        <i class="fa-solid fa-gift mr-1.5"></i>Quản lý Quà & Duyệt đơn
+                    </button>
+                    <button onclick="switchAdminSubTab('runs')" id="admin-sub-btn-runs" class="admin-sub-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-bold text-slate-600 hover:bg-slate-100 transition">
+                        <i class="fa-solid fa-list-check mr-1.5"></i>Kiểm duyệt Bài chạy
+                    </button>
+                </div>
+
+                <!-- ADMIN SUB-PANEL 1: USERS MANAGEMENT -->
+                <div id="admin-panel-users" class="bg-white rounded-3xl border border-slate-100 shadow-sm p-6">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5">
+                        <div>
+                            <h3 class="text-lg font-bold text-slate-900">Danh sách thành viên & Phân quyền</h3>
+                            <p class="text-xs text-slate-500">Quản lý thông tin Họ tên, Lớp, SĐT và điểm số của toàn bộ thành viên</p>
+                        </div>
+                        <div class="relative w-full sm:w-80">
+                            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400">
+                                <i class="fa-solid fa-magnifying-glass"></i>
+                            </span>
+                            <input type="text" id="admin-user-search" oninput="renderAdminPanel()" placeholder="Tìm theo họ tên, lớp, SĐT..." class="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-brand-orange outline-none">
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="border-b border-slate-200 text-xs font-bold text-slate-400 uppercase">
+                                    <th class="py-3 px-3">Họ tên & Email</th>
+                                    <th class="py-3 px-3">Lớp & SĐT</th>
+                                    <th class="py-3 px-3">Vai trò / Trạng thái</th>
+                                    <th class="py-3 px-3 text-right">Điểm / Km</th>
+                                    <th class="py-3 px-3 text-right">Thao tác quản trị</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-users-tbody" class="divide-y divide-slate-100 text-sm">
+                                <!-- Users injected via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- ADMIN SUB-PANEL 2: REWARDS & REDEMPTIONS -->
+                <div id="admin-panel-rewards" class="hidden space-y-6">
+                    <!-- Add New Reward Form -->
+                    <div class="bg-white rounded-3xl border border-slate-100 shadow-sm p-6">
+                        <h3 class="text-lg font-bold text-slate-900 mb-4">Thêm phần thưởng mới vào cửa hàng</h3>
+                        <form onsubmit="handleAdminAddReward(event)" class="grid grid-cols-1 sm:grid-cols-4 gap-4 items-end">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1">Tên phần thưởng</label>
+                                <input type="text" id="new-reward-title" required placeholder="VD: Áo Singlet VinaRun" class="w-full px-3.5 py-2 border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-brand-orange">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1">Điểm cần đổi</label>
+                                <input type="number" id="new-reward-cost" min="10" required placeholder="VD: 200" class="w-full px-3.5 py-2 border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-brand-orange">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1">Biểu tượng / Mô tả ngắn</label>
+                                <input type="text" id="new-reward-desc" required placeholder="VD: Áo thun thể thao thoáng khí" class="w-full px-3.5 py-2 border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-brand-orange">
+                            </div>
+                            <button type="submit" class="py-2.5 px-4 bg-brand-orange hover:bg-brand-orangeDark text-white font-bold rounded-xl text-sm transition">
+                                <i class="fa-solid fa-plus mr-1"></i> Thêm quà
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Existing Rewards List -->
+                    <div class="bg-white rounded-3xl border border-slate-100 shadow-sm p-6">
+                        <h3 class="text-lg font-bold text-slate-900 mb-4">Danh sách quà đang mở đổi</h3>
+                        <div id="admin-rewards-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+                    </div>
+
+                    <!-- Redemption Requests -->
+                    <div class="bg-white rounded-3xl border border-slate-100 shadow-sm p-6">
+                        <h3 class="text-lg font-bold text-slate-900 mb-4">Yêu cầu đổi quà từ thành viên</h3>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="border-b border-slate-200 text-xs font-bold text-slate-400 uppercase">
+                                        <th class="py-3 px-3">Thành viên (Lớp • SĐT)</th>
+                                        <th class="py-3 px-3">Phần thưởng</th>
+                                        <th class="py-3 px-3">Thời gian</th>
+                                        <th class="py-3 px-3">Trạng thái</th>
+                                        <th class="py-3 px-3 text-right">Duyệt đơn</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="admin-redemptions-tbody" class="divide-y divide-slate-100 text-sm"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ADMIN SUB-PANEL 3: RUN LOGS MODERATION -->
+                <div id="admin-panel-runs" class="hidden bg-white rounded-3xl border border-slate-100 shadow-sm p-6">
+                    <h3 class="text-lg font-bold text-slate-900 mb-2">Kiểm duyệt nhật ký chạy bộ</h3>
+                    <p class="text-xs text-slate-500 mb-4">Xóa các bản ghi chạy bộ không hợp lệ sẽ tự động trừ lại số km và điểm đã cộng của thành viên đó.</p>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="border-b border-slate-200 text-xs font-bold text-slate-400 uppercase">
+                                    <th class="py-3 px-3">Runner</th>
+                                    <th class="py-3 px-3">Quãng đường</th>
+                                    <th class="py-3 px-3">Thời gian / Pace</th>
+                                    <th class="py-3 px-3">Ghi chú</th>
+                                    <th class="py-3 px-3 text-right">Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-runs-tbody" class="divide-y divide-slate-100 text-sm"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- APPLICATION LOGIC (LOCALSTORAGE + REALTIME)-->
+    <!-- ========================================== -->
+    <script>
+        const STORAGE_KEY = 'vinarun_club_data_v2';
+
+        // App Data Cache (Persisted in localStorage)
+        let appState = {
+            currentUserId: null,
+            users: [],
+            runs: [],
+            checkins: [],
+            rewards: [],
+            redemptions: [],
+            leaderboardSort: 'points'
+        };
+
+        function saveStateToStorage() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify({
+                    currentUserId: appState.currentUserId,
+                    users: appState.users,
+                    runs: appState.runs,
+                    checkins: appState.checkins,
+                    rewards: appState.rewards,
+                    redemptions: appState.redemptions
+                }));
+            } catch (e) {
+                console.error("Failed to save state to localStorage:", e);
+            }
+        }
+
+        function loadStateFromStorage() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    appState.currentUserId = parsed.currentUserId || null;
+                    appState.users = Array.isArray(parsed.users) ? parsed.users : [];
+                    appState.runs = Array.isArray(parsed.runs) ? parsed.runs : [];
+                    appState.checkins = Array.isArray(parsed.checkins) ? parsed.checkins : [];
+                    appState.rewards = Array.isArray(parsed.rewards) ? parsed.rewards : [];
+                    appState.redemptions = Array.isArray(parsed.redemptions) ? parsed.redemptions : [];
+                }
+            } catch (e) {
+                console.error("Failed to load state from localStorage:", e);
+            }
+        }
+
+        // Initialize Application
+        function initApp() {
+            loadStateFromStorage();
+            if (appState.users.length === 0) {
+                seedSampleData(false);
+            }
+            const loader = document.getElementById('loading-overlay');
+            if (loader) loader.classList.add('hidden');
+            updateAuthAndScreenVisibility();
+        }
+
+        // Database Write Wrappers (Persists immediately to localStorage)
+        function dbSet(colName, id, data) {
+            const idx = appState[colName].findIndex(item => item.id === id);
+            if (idx >= 0) appState[colName][idx] = { id, ...data };
+            else appState[colName].unshift({ id, ...data });
+            saveStateToStorage();
+            renderAll();
+        }
+
+        function dbUpdate(colName, id, data) {
+            const idx = appState[colName].findIndex(item => item.id === id);
+            if (idx >= 0) {
+                appState[colName][idx] = { ...appState[colName][idx], ...data };
+                saveStateToStorage();
+                renderAll();
+            }
+        }
+
+        function dbDelete(colName, id) {
+            appState[colName] = appState[colName].filter(item => item.id !== id);
+            saveStateToStorage();
+            renderAll();
+        }
+
+        // Seed Initial Data with full Name, Class, Phone
+        window.seedSampleData = function(isManual = false) {
+            const now = new Date();
+            const yesterday = new Date(now.getTime() - 86400000).toISOString().split('T')[0];
+
+            const sampleUsers = [
+                {
+                    id: 'admin-demo-01',
+                    name: 'Trần Minh Quân',
+                    className: '12A1 - Ban Chủ Nhiệm',
+                    phone: '0901234567',
+                    email: 'admin@vinarun.vn',
+                    password: '123',
+                    role: 'admin',
+                    points: 450,
+                    totalKm: 68.5,
+                    streak: 7,
+                    lastCheckinDate: yesterday,
+                    isLocked: false,
+                    createdAt: new Date(now.getTime() - 86400000 * 10).toISOString()
+                },
+                {
+                    id: 'runner-demo-02',
+                    name: 'Lê Thu Hà',
+                    className: '11A2',
+                    phone: '0912345678',
+                    email: 'runner@vinarun.vn',
+                    password: '123',
+                    role: 'runner',
+                    points: 320,
+                    totalKm: 42.0,
+                    streak: 4,
+                    lastCheckinDate: yesterday,
+                    isLocked: false,
+                    createdAt: new Date(now.getTime() - 86400000 * 8).toISOString()
+                },
+                {
+                    id: 'runner-demo-03',
+                    name: 'Nguyễn Hoàng Nam',
+                    className: '12A5',
+                    phone: '0987654321',
+                    email: 'nam.nguyen@vinarun.vn',
+                    password: '123',
+                    role: 'runner',
+                    points: 510,
+                    totalKm: 84.2,
+                    streak: 12,
+                    lastCheckinDate: now.toISOString().split('T')[0],
+                    isLocked: false,
+                    createdAt: new Date(now.getTime() - 86400000 * 15).toISOString()
+                }
+            ];
+
+            const sampleRewards = [
+                { id: 'rew-1', title: 'Huy Hiệu Runner Chăm Chỉ', cost: 50, desc: 'Huy hiệu danh dự hiển thị trên hồ sơ cá nhân', icon: 'fa-medal' },
+                { id: 'rew-2', title: 'Bình Nước Thể Thao 750ml', cost: 150, desc: 'Bình nước giữ nhiệt chính hãng VinaRun Club', icon: 'fa-bottle-water' },
+                { id: 'rew-3', title: 'Áo Thun Giải Chạy VinaRun', cost: 300, desc: 'Áo singlet siêu nhẹ thoáng khí dành cho runner', icon: 'fa-shirt' },
+                { id: 'rew-4', title: 'Voucher Giày Chạy Bộ 500K', cost: 600, desc: 'Phiếu mua hàng giảm giá tại hệ thống đối tác', icon: 'fa-ticket' }
+            ];
+
+            const sampleRuns = [
+                {
+                    id: 'run-sample-1',
+                    userId: 'runner-demo-03',
+                    userName: 'Nguyễn Hoàng Nam',
+                    userClass: '12A5',
+                    distance: 10.5,
+                    duration: 55,
+                    pace: '5:14',
+                    pointsEarned: 53,
+                    note: 'Chạy dài cuối tuần quanh hồ, cảm giác rất sung sức!',
+                    createdAt: new Date(now.getTime() - 3600000 * 2).toISOString()
+                },
+                {
+                    id: 'run-sample-2',
+                    userId: 'runner-demo-02',
+                    userName: 'Lê Thu Hà',
+                    userClass: '11A2',
+                    distance: 5.0,
+                    duration: 31,
+                    pace: '6:12',
+                    pointsEarned: 25,
+                    note: 'Chạy nhẹ phục hồi buổi sáng',
+                    createdAt: new Date(now.getTime() - 3600000 * 5).toISOString()
+                }
+            ];
+
+            for (const u of sampleUsers) {
+                if (!appState.users.some(existing => existing.id === u.id)) {
+                    dbSet('users', u.id, u);
+                }
+            }
+            for (const r of sampleRewards) {
+                if (!appState.rewards.some(existing => existing.id === r.id)) {
+                    dbSet('rewards', r.id, r);
+                }
+            }
+            for (const run of sampleRuns) {
+                if (!appState.runs.some(existing => existing.id === run.id)) {
+                    dbSet('runs', run.id, run);
+                }
+            }
+
+            if (isManual) {
+                showToast("Đã khôi phục & bổ sung dữ liệu mẫu thành công!", "success");
+            }
+        };
+
+        // ==========================================
+        // AUTHENTICATION HANDLERS
+        // ==========================================
+        window.switchAuthTab = function(tab) {
+            const loginForm = document.getElementById('login-form');
+            const regForm = document.getElementById('register-form');
+            const loginBtn = document.getElementById('tab-login-btn');
+            const regBtn = document.getElementById('tab-register-btn');
+
+            if (tab === 'login') {
+                loginForm.classList.remove('hidden');
+                regForm.classList.add('hidden');
+                loginBtn.className = "py-2.5 text-sm font-semibold rounded-lg bg-white text-slate-900 shadow-sm transition";
+                regBtn.className = "py-2.5 text-sm font-semibold rounded-lg text-slate-500 hover:text-slate-900 transition";
+            } else {
+                loginForm.classList.add('hidden');
+                regForm.classList.remove('hidden');
+                regBtn.className = "py-2.5 text-sm font-semibold rounded-lg bg-white text-slate-900 shadow-sm transition";
+                loginBtn.className = "py-2.5 text-sm font-semibold rounded-lg text-slate-500 hover:text-slate-900 transition";
+            }
+        };
+
+        window.handleLogin = function(e) {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value.trim().toLowerCase();
+            const password = document.getElementById('login-password').value;
+
+            const user = appState.users.find(u => u.email.toLowerCase() === email && u.password === password);
+            if (!user) {
+                showToast("Email hoặc mật khẩu không chính xác!", "error");
+                return;
+            }
+            if (user.isLocked) {
+                showToast("Tài khoản của bạn đã bị Quản trị viên tạm khóa!", "error");
+                return;
+            }
+
+            appState.currentUserId = user.id;
+            saveStateToStorage();
+            showToast(`Chào mừng ${user.name} (${user.className || 'Runner'}) quay trở lại!`, "success");
+            updateAuthAndScreenVisibility();
+        };
+
+        window.handleRegister = function(e) {
+            e.preventDefault();
+            const name = document.getElementById('reg-name').value.trim();
+            const className = document.getElementById('reg-class').value.trim();
+            const phone = document.getElementById('reg-phone').value.trim();
+            const email = document.getElementById('reg-email').value.trim().toLowerCase();
+            const password = document.getElementById('reg-password').value;
+            const adminCode = document.getElementById('reg-admin-code').value.trim().toUpperCase();
+
+            if (!name || !className || !phone) {
+                showToast("Vui lòng điền đầy đủ Họ tên, Lớp và Số điện thoại!", "error");
+                return;
+            }
+
+            if (appState.users.some(u => u.email.toLowerCase() === email)) {
+                showToast("Email này đã được đăng ký. Vui lòng đăng nhập!", "error");
+                return;
+            }
+
+            // First user ever OR matching admin secret code becomes Admin
+            const isFirstUser = appState.users.length === 0;
+            const isAdmin = isFirstUser || adminCode === 'ADMIN2026';
+
+            const newUserId = 'user-' + Date.now();
+            const newUser = {
+                id: newUserId,
+                name,
+                className,
+                phone,
+                email,
+                password,
+                role: isAdmin ? 'admin' : 'runner',
+                points: 20, // Welcome bonus
+                totalKm: 0,
+                streak: 0,
+                lastCheckinDate: '',
+                isLocked: false,
+                createdAt: new Date().toISOString()
+            };
+
+            dbSet('users', newUserId, newUser);
+            appState.currentUserId = newUserId;
+            saveStateToStorage();
+
+            showToast(
+                isAdmin
+                    ? `Đăng ký thành công với quyền QUẢN TRỊ VIÊN! (+20đ chào mừng)`
+                    : `Đăng ký thành công! Chào mừng ${name} - Lớp ${className} (+20 điểm).`,
+                "success"
+            );
+            updateAuthAndScreenVisibility();
+        };
+
+        window.quickDemoLogin = function(type) {
+            const targetEmail = type === 'admin' ? 'admin@vinarun.vn' : 'runner@vinarun.vn';
+            let user = appState.users.find(u => u.email === targetEmail);
+            if (!user && appState.users.length > 0) {
+                user = type === 'admin'
+                    ? appState.users.find(u => u.role === 'admin') || appState.users[0]
+                    : appState.users.find(u => u.role !== 'admin') || appState.users[0];
+            }
+            if (user) {
+                if (user.isLocked) {
+                    showToast("Tài khoản demo này đang bị khóa!", "error");
+                    return;
+                }
+                appState.currentUserId = user.id;
+                saveStateToStorage();
+                showToast(`Đã đăng nhập nhanh: ${user.name} (${user.className || ''})`, "success");
+                updateAuthAndScreenVisibility();
+            }
+        };
+
+        window.handleLogout = function() {
+            appState.currentUserId = null;
+            saveStateToStorage();
+            updateAuthAndScreenVisibility();
+            showToast("Bạn đã đăng xuất khỏi hệ thống.", "info");
+        };
+
+        function getCurrentUser() {
+            return appState.users.find(u => u.id === appState.currentUserId) || null;
+        }
+
+        function updateAuthAndScreenVisibility() {
+            const authScreen = document.getElementById('auth-screen');
+            const appScreen = document.getElementById('app-screen');
+            const user = getCurrentUser();
+
+            if (!user) {
+                authScreen.classList.remove('hidden');
+                appScreen.classList.add('hidden');
+            } else {
+                authScreen.classList.add('hidden');
+                appScreen.classList.remove('hidden');
+                renderAll();
+            }
+        }
+
+        // ==========================================
+        // NAVIGATION
+        // ==========================================
+        window.switchNav = function(tabName) {
+            const sections = ['dashboard', 'leaderboard', 'rewards', 'history', 'admin'];
+            sections.forEach(sec => {
+                const el = document.getElementById(`section-${sec}`);
+                const btn = document.getElementById(`nav-btn-${sec}`);
+                if (el) el.classList.toggle('hidden', sec !== tabName);
+                if (btn) {
+                    if (sec === tabName) {
+                        btn.className = sec === 'admin'
+                            ? "nav-tab px-4 py-2 rounded-xl text-sm font-bold whitespace-nowrap flex items-center gap-2 bg-amber-500 text-slate-950 ml-auto transition"
+                            : "nav-tab px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap flex items-center gap-2 bg-brand-orange text-white transition";
+                    } else {
+                        btn.className = sec === 'admin'
+                            ? "nav-tab px-4 py-2 rounded-xl text-sm font-bold whitespace-nowrap flex items-center gap-2 text-amber-400 hover:bg-amber-500/20 border border-amber-500/30 ml-auto transition"
+                            : "nav-tab px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap flex items-center gap-2 text-slate-300 hover:bg-slate-700/60 transition";
+                    }
+                }
+            });
+            renderAll();
+        };
+
+        window.switchAdminSubTab = function(subName) {
+            ['users', 'rewards', 'runs'].forEach(sub => {
+                document.getElementById(`admin-panel-${sub}`).classList.toggle('hidden', sub !== subName);
+                const btn = document.getElementById(`admin-sub-btn-${sub}`);
+                btn.className = sub === subName
+                    ? "admin-sub-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-bold bg-slate-900 text-white transition"
+                    : "admin-sub-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-bold text-slate-600 hover:bg-slate-100 transition";
+            });
+        };
+
+        // ==========================================
+        // RUNNER FEATURES: CHECK-IN, LOG RUN, REWARDS
+        // ==========================================
+        function getTodayStr() {
+            const d = new Date();
+            return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        }
+
+        function getYesterdayStr() {
+            const d = new Date(Date.now() - 86400000);
+            return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        }
+
+        window.handleDailyCheckin = function() {
+            const user = getCurrentUser();
+            if (!user) return;
+
+            const today = getTodayStr();
+            if (user.lastCheckinDate === today) {
+                showToast("Hôm nay bạn đã điểm danh rồi! Hãy quay lại vào ngày mai nhé.", "info");
+                return;
+            }
+
+            const newStreak = user.lastCheckinDate === getYesterdayStr() ? (user.streak || 0) + 1 : 1;
+            const bonusPoints = 10;
+            const updatedPoints = (user.points || 0) + bonusPoints;
+
+            dbUpdate('users', user.id, {
+                points: updatedPoints,
+                streak: newStreak,
+                lastCheckinDate: today
+            });
+
+            const checkinId = 'chk-' + Date.now();
+            dbSet('checkins', checkinId, {
+                id: checkinId,
+                userId: user.id,
+                userName: user.name,
+                date: today,
+                pointsEarned: bonusPoints,
+                streakCount: newStreak,
+                createdAt: new Date().toISOString()
+            });
+
+            showToast(`Điểm danh thành công! +${bonusPoints} điểm (Chuỗi ${newStreak} ngày liên tiếp)`, "success");
+        };
+
+        window.updatePacePreview = function() {
+            const dist = parseFloat(document.getElementById('run-distance').value) || 0;
+            const dur = parseFloat(document.getElementById('run-duration').value) || 0;
+
+            if (dist > 0 && dur > 0) {
+                const paceDecimal = dur / dist;
+                const paceMin = Math.floor(paceDecimal);
+                const paceSec = Math.round((paceDecimal - paceMin) * 60);
+                document.getElementById('preview-pace').textContent = `${paceMin}:${String(paceSec).padStart(2, '0')} /km`;
+                document.getElementById('preview-points').textContent = `+${Math.round(dist * 5)} điểm`;
+            } else {
+                document.getElementById('preview-pace').textContent = `--:-- /km`;
+                document.getElementById('preview-points').textContent = `+0 điểm`;
+            }
+        };
+        window.handleLogRun = function(e) {
+            e.preventDefault();
+            const user = getCurrentUser();
+            if (!user) return;
+
+            const distance = parseFloat(document.getElementById('run-distance').value);
+            const duration = parseInt(document.getElementById('run-duration').value, 10);
+            const note = document.getElementById('run-note').value.trim() || "Hoàn thành mục tiêu chạy bộ!";
+
+            if (distance <= 0 || duration <= 0) {
+                showToast("Quãng đường và thời gian phải lớn hơn 0!", "error");
+                return;
+            }
+
+            const paceDecimal = duration / distance;
+            const paceMin = Math.floor(paceDecimal);
+            const paceSec = Math.round((paceDecimal - paceMin) * 60);
+            const paceStr = `${paceMin}:${String(paceSec).padStart(2, '0')}`;
+            const pointsEarned = Math.round(distance * 5);
+
+            const runId = 'run-' + Date.now();
+            dbSet('runs', runId, {
+                id: runId,
+                userId: user.id,
+                userName: user.name,
+                userClass: user.className || '',
+                distance,
+                duration,
+                pace: paceStr,
+                pointsEarned,
+                note,
+                createdAt: new Date().toISOString()
+            });
+
+            dbUpdate('users', user.id, {
+                points: (user.points || 0) + pointsEarned,
+                totalKm: parseFloat(((user.totalKm || 0) + distance).toFixed(2))
+            });
+
+            document.getElementById('run-distance').value = '';
+            document.getElementById('run-duration').value = '';
+            document.getElementById('run-note').value = '';
+            updatePacePreview();
+
+            showToast(`Tuyệt vời! Bạn đã chạy ${distance}km và nhận +${pointsEarned} điểm!`, "success");
+        };
+        function executeRedeemReward(user, reward) {
+            dbUpdate('users', user.id, {
+                points: (user.points || 0) - reward.cost
+            });
+
+            const redId = 'red-' + Date.now();
+            dbSet('redemptions', redId, {
+                id: redId,
+                userId: user.id,
+                userName: user.name,
+                userClass: user.className || 'Chưa cập nhật',
+                userPhone: user.phone || 'Chưa cập nhật',
+                rewardId: reward.id,
+                rewardTitle: reward.title,
+                cost: reward.cost,
+                status: 'pending', // pending | approved
+                createdAt: new Date().toISOString()
+            });
+
+            showToast(`Đổi quà thành công! Yêu cầu nhận "${reward.title}" đã được gửi tới Quản trị viên.`, "success");
+        }
+
+        // User Self-Edit Profile Modal
+        window.openEditProfileModal = function() {
+            const user = getCurrentUser();
+            if (!user) return;
+
+            openModal(
+                "Cập nhật thông tin cá nhân",
+                `<div class="space-y-3">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Họ và tên <span class="text-red-500">*</span></label>
+                        <input type="text" id="edit-self-name" value="${escapeHtml(user.name)}" class="w-full px-3.5 py-2 border border-slate-300 rounded-xl font-semibold text-slate-900">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Lớp / Đơn vị <span class="text-red-500">*</span></label>
+                        <input type="text" id="edit-self-class" value="${escapeHtml(user.className || '')}" placeholder="VD: 12A1, K65-CNTT" class="w-full px-3.5 py-2 border border-slate-300 rounded-xl font-semibold text-slate-900">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Số điện thoại <span class="text-red-500">*</span></label>
+                        <input type="tel" id="edit-self-phone" value="${escapeHtml(user.phone || '')}" placeholder="0912345678" class="w-full px-3.5 py-2 border border-slate-300 rounded-xl font-semibold text-slate-900">
+                    </div>
+                </div>`,
+                [
+                    { label: "Hủy", class: "px-4 py-2 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-100", onClick: closeModal },
+                    {
+                        label: "Lưu thông tin",
+                        class: "px-4 py-2 rounded-xl text-sm font-bold bg-brand-orange text-white hover:bg-brand-orangeDark",
+                        onClick: () => {
+                            const name = document.getElementById('edit-self-name').value.trim();
+                            const className = document.getElementById('edit-self-class').value.trim();
+                            const phone = document.getElementById('edit-self-phone').value.trim();
+                            if (!name || !className || !phone) {
+                                showToast("Vui lòng nhập đầy đủ Họ tên, Lớp và SĐT!", "error");
+                                return;
+                            }
+                            dbUpdate('users', user.id, { name, className, phone });
+                            closeModal();
+                            showToast("Đã cập nhật thông tin cá nhân!", "success");
+                        }
+                    }
+                ]
+            );
+        };
+
+        // ==========================================
+        // ADMIN FEATURES
+        // ==========================================
+        window.adminEditUserModal = function(targetUserId) {
+            const targetUser = appState.users.find(u => u.id === targetUserId);
+            if (!targetUser) return;
+
+            openModal(
+                `Chỉnh sửa hồ sơ: ${targetUser.name}`,
+                `<div class="space-y-3">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Họ và tên</label>
+                        <input type="text" id="admin-edit-name" value="${escapeHtml(targetUser.name)}" class="w-full px-3.5 py-2 border border-slate-300 rounded-xl font-semibold text-slate-900">
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">Lớp</label>
+                            <input type="text" id="admin-edit-class" value="${escapeHtml(targetUser.className || '')}" class="w-full px-3.5 py-2 border border-slate-300 rounded-xl font-semibold text-slate-900">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">Số điện thoại</label>
+                            <input type="tel" id="admin-edit-phone" value="${escapeHtml(targetUser.phone || '')}" class="w-full px-3.5 py-2 border border-slate-300 rounded-xl font-semibold text-slate-900">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Số điểm tích lũy hiện tại</label>
+                        <input type="number" id="admin-edit-points" value="${targetUser.points || 0}" min="0" class="w-full px-3.5 py-2 border border-slate-300 rounded-xl font-bold text-amber-600">
+                    </div>
+                </div>`,
+                [
+                    { label: "Hủy", class: "px-4 py-2 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-100", onClick: closeModal },
+                    {
+                        label: "Lưu thay đổi",
+                        class: "px-4 py-2 rounded-xl text-sm font-bold bg-slate-900 text-white hover:bg-brand-orange",
+                        onClick: () => {
+                            const name = document.getElementById('admin-edit-name').value.trim();
+                            const className = document.getElementById('admin-edit-class').value.trim();
+                            const phone = document.getElementById('admin-edit-phone').value.trim();
+                            const points = parseInt(document.getElementById('admin-edit-points').value, 10);
+                            if (!name || !className || !phone || isNaN(points)) {
+                                showToast("Vui lòng điền đầy đủ thông tin hợp lệ!", "error");
+                                return;
+                            }
+                            dbUpdate('users', targetUser.id, {
+                                name,
+                                className,
+                                phone,
+                                points: Math.max(0, points)
+                            });
+                            closeModal();
+                            showToast(`Đã cập nhật thông tin cho ${name}`, "success");
+                        }
+                    }
+                ]
+            );
+        };
+
+        window.adminAdjustPointsPrompt = function(targetUserId) {
+            const targetUser = appState.users.find(u => u.id === targetUserId);
+            if (!targetUser) return;
+
+            openModal(
+                `Điều chỉnh điểm: ${targetUser.name}`,
+                `<div class="space-y-3">
+                    <p class="text-xs text-slate-500">Số điểm hiện tại: <strong class="text-slate-900">${targetUser.points} điểm</strong></p>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Nhập số điểm cộng (số dương) hoặc trừ (số âm):</label>
+                        <input type="number" id="admin-adjust-input" value="50" class="w-full px-3.5 py-2 border border-slate-300 rounded-xl font-bold text-slate-900">
+                    </div>
+                </div>`,
+                [
+                    { label: "Hủy", class: "px-4 py-2 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-100", onClick: closeModal },
+                    {
+                        label: "Cập nhật điểm",
+                        class: "px-4 py-2 rounded-xl text-sm font-bold bg-slate-900 text-white hover:bg-brand-orange",
+                        onClick: () => {
+                            const delta = parseInt(document.getElementById('admin-adjust-input').value, 10);
+                            if (isNaN(delta) || delta === 0) return;
+                            const newPoints = Math.max(0, (targetUser.points || 0) + delta);
+                            dbUpdate('users', targetUser.id, { points: newPoints });
+                            closeModal();
+                            showToast(`Đã ${delta > 0 ? 'cộng +' + delta : 'trừ ' + delta} điểm cho ${targetUser.name}`, "success");
+                        }
+                    }
+                ]
+            );
+        };
+
+        window.adminToggleRole = function(targetUserId) {
+            const targetUser = appState.users.find(u => u.id === targetUserId);
+            if (!targetUser) return;
+            if (targetUser.id === appState.currentUserId) {
+                showToast("Bạn không thể tự hạ quyền Quản trị viên của chính mình!", "error");
+                return;
+            }
+            const newRole = targetUser.role === 'admin' ? 'runner' : 'admin';
+            dbUpdate('users', targetUser.id, { role: newRole });
+            showToast(`Đã cập nhật vai trò của ${targetUser.name} thành ${newRole === 'admin' ? 'Quản trị viên' : 'Thành viên'}.`, "success");
+        };
+
+        window.adminToggleLock = function(targetUserId) {
+            const targetUser = appState.users.find(u => u.id === targetUserId);
+            if (!targetUser) return;
+            if (targetUser.id === appState.currentUserId) {
+                showToast("Bạn không thể tự khóa tài khoản của chính mình!", "error");
+                return;
+            }
+            const newLock = !targetUser.isLocked;
+            dbUpdate('users', targetUser.id, { isLocked: newLock });
+            showToast(newLock ? `Đã khóa tài khoản ${targetUser.name}` : `Đã mở khóa tài khoản ${targetUser.name}`, "info");
+        };
+
+        window.handleAdminAddReward = function(e) {
+            e.preventDefault();
+            const title = document.getElementById('new-reward-title').value.trim();
+            const cost = parseInt(document.getElementById('new-reward-cost').value, 10);
+            const desc = document.getElementById('new-reward-desc').value.trim();
+
+            const rewardId = 'rew-' + Date.now();
+            dbSet('rewards', rewardId, {
+                id: rewardId,
+                title,
+                cost,
+                desc,
+                icon: 'fa-gift'
+            });
+
+            document.getElementById('new-reward-title').value = '';
+            document.getElementById('new-reward-cost').value = '';
+            document.getElementById('new-reward-desc').value = '';
+            showToast(`Đã thêm phần thưởng "${title}" vào cửa hàng!`, "success");
+        };
+
+        window.adminDeleteReward = function(rewardId) {
+            dbDelete('rewards', rewardId);
+            showToast("Đã xóa phần thưởng khỏi cửa hàng.", "info");
+        };
+
+        window.adminApproveRedemption = function(redId) {
+            dbUpdate('redemptions', redId, { status: 'approved' });
+            showToast("Đã duyệt yêu cầu đổi quà!", "success");
+        };
+
+        window.adminDeleteRun = function(runId) {
+            const run = appState.runs.find(r => r.id === runId);
+            if (!run) return;
+
+            const runner = appState.users.find(u => u.id === run.userId);
+            if (runner) {
+                dbUpdate('users', runner.id, {
+                    points: Math.max(0, (runner.points || 0) - (run.pointsEarned || 0)),
+                    totalKm: Math.max(0, parseFloat(((runner.totalKm || 0) - (run.distance || 0)).toFixed(2)))
+                });
+            }
+
+            dbDelete('runs', runId);
+            showToast("Đã xóa bản ghi chạy bộ và hoàn trừ điểm/km tương ứng.", "info");
+        };
+
+        // ==========================================
+        // RENDERING FUNCTIONS
+        // ==========================================
+        window.setLeaderboardSort = function(sortType) {
+            appState.leaderboardSort = sortType;
+            document.getElementById('lb-sort-points').className = sortType === 'points'
+                ? "px-4 py-2 rounded-lg text-xs font-bold bg-white text-slate-900 shadow-sm transition"
+                : "px-4 py-2 rounded-lg text-xs font-bold text-slate-500 hover:text-slate-900 transition";
+            document.getElementById('lb-sort-km').className = sortType === 'km'
+                ? "px-4 py-2 rounded-lg text-xs font-bold bg-white text-slate-900 shadow-sm transition"
+                : "px-4 py-2 rounded-lg text-xs font-bold text-slate-500 hover:text-slate-900 transition";
+            renderLeaderboard();
+        };
+
+        function renderAll() {
+            const user = getCurrentUser();
+            if (!user) return;
+
+            const isAdmin = user.role === 'admin';
+
+            // Header Info
+            document.getElementById('nav-user-points').textContent = user.points || 0;
+            document.getElementById('nav-user-name').textContent = user.name;
+            document.getElementById('nav-user-role-text').textContent = `${user.className || 'Chưa có lớp'} • ${user.phone || ''}`;
+            document.getElementById('header-admin-badge').classList.toggle('hidden', !isAdmin);
+            document.getElementById('nav-btn-admin').classList.toggle('hidden', !isAdmin);
+
+            // Dashboard Info
+            document.getElementById('dash-greeting-name').textContent = user.name;
+            document.getElementById('dash-user-class').textContent = `Lớp: ${user.className || 'Chưa cập nhật'}`;
+            document.getElementById('dash-user-phone').textContent = user.phone || 'Chưa cập nhật';
+            document.getElementById('dash-streak').textContent = user.streak || 0;
+            document.getElementById('stat-points').textContent = user.points || 0;
+            document.getElementById('stat-km').textContent = (user.totalKm || 0).toFixed(1);
+            document.getElementById('stat-streak').textContent = user.streak || 0;
+
+            const myRuns = appState.runs.filter(r => r.userId === user.id);
+            document.getElementById('stat-runs-count').textContent = myRuns.length;
+
+            // Check-in Button State
+            const checkedToday = user.lastCheckinDate === getTodayStr();
+            const checkinBtn = document.getElementById('btn-daily-checkin');
+            if (checkedToday) {
+                checkinBtn.className = "px-6 py-4 bg-emerald-600/90 text-white font-extrabold rounded-2xl shadow-lg transition flex items-center justify-center gap-3 text-base cursor-default";
+                document.getElementById('checkin-btn-title').textContent = "Đã điểm danh hôm nay";
+                document.getElementById('checkin-btn-sub').textContent = "Hẹn gặp lại bạn ngày mai!";
+            } else {
+                checkinBtn.className = "px-6 py-4 bg-brand-orange hover:bg-brand-orangeDark text-white font-extrabold rounded-2xl shadow-lg shadow-orange-500/30 transition flex items-center justify-center gap-3 text-base";
+                document.getElementById('checkin-btn-title').textContent = "Điểm danh hôm nay";
+                document.getElementById('checkin-btn-sub').textContent = "Nhận ngay +10 điểm";
+            }
+
+            renderClubFeed();
+            renderLeaderboard();
+            renderRewards();
+            renderPersonalHistory(user);
+            if (isAdmin) renderAdminPanel();
+        }
+
+        function renderClubFeed() {
+            const container = document.getElementById('club-feed-list');
+            if (appState.runs.length === 0) {
+                container.innerHTML = `<div class="text-center py-8 text-slate-400 text-sm">Chưa có hoạt động chạy bộ nào. Hãy là người đầu tiên!</div>`;
+                return;
+            }
+
+            const sortedRuns = [...appState.runs].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+            container.innerHTML = sortedRuns.slice(0, 15).map(run => {
+                const timeAgo = formatTimeAgo(run.createdAt);
+                const userObj = appState.users.find(u => u.id === run.userId);
+                const displayClass = run.userClass || (userObj ? userObj.className : '');
+                return `
+                    <div class="p-4 rounded-2xl bg-slate-50 border border-slate-100 flex items-start justify-between gap-3">
+                        <div class="flex items-start gap-3">
+                            <div class="w-10 h-10 rounded-full bg-slate-900 text-white font-bold flex items-center justify-center shrink-0 text-sm">
+                                ${run.userName.charAt(0).toUpperCase()}
+                            </div>
+                            <div>
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    <span class="font-bold text-slate-900 text-sm">${escapeHtml(run.userName)}</span>
+                                    ${displayClass ? `<span class="px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 text-[10px] font-bold">${escapeHtml(displayClass)}</span>` : ''}
+                                    <span class="text-[11px] text-slate-400">• ${timeAgo}</span>
+                                </div>
+                                <p class="text-xs text-slate-600 mt-0.5">"${escapeHtml(run.note)}"</p>
+                                <div class="flex items-center gap-3 mt-2 text-xs font-semibold">
+                                    <span class="text-brand-orange"><i class="fa-solid fa-route mr-1"></i>${run.distance} km</span>
+                                    <span class="text-slate-600"><i class="fa-solid fa-clock mr-1"></i>${run.duration} phút</span>
+                                    <span class="text-blue-600"><i class="fa-solid fa-gauge-high mr-1"></i>Pace ${run.pace}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <span class="px-2.5 py-1 rounded-lg bg-amber-100 text-amber-800 text-xs font-extrabold shrink-0">
+                            +${run.pointsEarned}đ
+                        </span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderLeaderboard() {
+            const sorted = [...appState.users].sort((a, b) => {
+                if (appState.leaderboardSort === 'km') {
+                    return (b.totalKm || 0) - (a.totalKm || 0);
+                }
+                return (b.points || 0) - (a.points || 0);
+            });
+
+            // Top 3 Podium
+            const podiumEl = document.getElementById('leaderboard-podium');
+            const medals = [
+                { bg: 'bg-gradient-to-br from-amber-50 to-amber-100/70 border-amber-300', badge: 'bg-amber-500 text-white', label: 'Hạng 1 🥇' },
+                { bg: 'bg-gradient-to-br from-slate-50 to-slate-100 border-slate-300', badge: 'bg-slate-500 text-white', label: 'Hạng 2 🥈' },
+                { bg: 'bg-gradient-to-br from-orange-50 to-orange-100/60 border-orange-300', badge: 'bg-orange-700 text-white', label: 'Hạng 3 🥉' }
+            ];
+
+            podiumEl.innerHTML = sorted.slice(0, 3).map((u, idx) => {
+                const m = medals[idx];
+                return `
+                    <div class="p-5 rounded-2xl border ${m.bg} relative overflow-hidden">
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="px-3 py-1 rounded-full text-xs font-extrabold ${m.badge}">${m.label}</span>
+                            ${u.role === 'admin' ? '<span class="text-[10px] font-bold px-2 py-0.5 bg-slate-900 text-amber-400 rounded-full">Admin</span>' : ''}
+                        </div>
+                        <div class="font-extrabold text-lg text-slate-900 truncate">${escapeHtml(u.name)}</div>
+                        <div class="text-xs font-semibold text-slate-600 mt-0.5 flex items-center gap-1.5">
+                            <i class="fa-solid fa-graduation-cap text-brand-orange"></i>
+                            <span>${escapeHtml(u.className || 'Chưa cập nhật lớp')}</span>
+                        </div>
+                        <div class="mt-3 pt-3 border-t border-slate-200/60 flex items-center justify-between text-sm">
+                            <div>
+                                <div class="text-[11px] text-slate-500">Tổng điểm</div>
+                                <div class="font-extrabold text-amber-700">${u.points || 0} đ</div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-[11px] text-slate-500">Quãng đường</div>
+                                <div class="font-extrabold text-brand-orange">${(u.totalKm || 0).toFixed(1)} km</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            // Full Table
+            const tbody = document.getElementById('leaderboard-table-body');
+            tbody.innerHTML = sorted.map((u, idx) => {
+                const isMe = u.id === appState.currentUserId;
+                return `
+                    <tr class="${isMe ? 'bg-orange-50/60 font-semibold' : 'hover:bg-slate-50'}">
+                        <td class="py-3.5 px-4 font-extrabold text-slate-700">#${idx + 1}</td>
+                        <td class="py-3.5 px-4">
+                            <div class="flex items-center gap-2.5">
+                                <div class="w-8 h-8 rounded-full bg-slate-800 text-white text-xs font-bold flex items-center justify-center shrink-0">
+                                    ${u.name.charAt(0).toUpperCase()}
+                                </div>
+                                <div>
+                                    <div class="text-slate-900 font-bold flex items-center flex-wrap gap-1.5">
+                                        <span>${escapeHtml(u.name)}</span>
+                                        <span class="px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 text-[11px] font-bold">${escapeHtml(u.className || 'N/A')}</span>
+                                        ${isMe ? '<span class="text-[10px] px-2 py-0.5 bg-brand-orange text-white rounded-full">Bạn</span>' : ''}
+                                    </div>
+                                    ${u.role === 'admin' ? '<span class="text-[10px] text-amber-600 font-bold"><i class="fa-solid fa-crown mr-1"></i>Quản trị viên</span>' : ''}
+                                </div>
+                            </div>
+                        </td>
+                        <td class="py-3.5 px-4 text-right font-bold text-slate-700">${(u.totalKm || 0).toFixed(1)} km</td>
+                        <td class="py-3.5 px-4 text-right text-emerald-600 font-semibold">${u.streak || 0} ngày</td>
+                        <td class="py-3.5 px-4 text-right font-extrabold text-brand-orange">${u.points || 0} đ</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function renderRewards() {
+            const user = getCurrentUser();
+            document.getElementById('rewards-user-points').textContent = user.points || 0;
+
+            const grid = document.getElementById('rewards-grid');
+            if (appState.rewards.length === 0) {
+                grid.innerHTML = `<div class="col-span-full text-center py-8 text-slate-400">Hiện chưa có phần thưởng nào trong cửa hàng.</div>`;
+                return;
+            }
+
+            grid.innerHTML = appState.rewards.map(r => {
+                const canAfford = (user.points || 0) >= r.cost;
+                return `
+                    <div class="rounded-2xl border border-slate-200 p-5 flex flex-col justify-between hover:shadow-md transition bg-white">
+                        <div>
+                            <div class="w-12 h-12 rounded-2xl bg-orange-100 text-brand-orange flex items-center justify-center text-xl mb-4">
+                                <i class="fa-solid ${r.icon || 'fa-gift'}"></i>
+                            </div>
+                            <h3 class="font-extrabold text-lg text-slate-900">${escapeHtml(r.title)}</h3>
+                            <p class="text-xs text-slate-500 mt-1 leading-relaxed">${escapeHtml(r.desc)}</p>
+                        </div>
+                        <div class="mt-5 pt-4 border-t border-slate-100 flex items-center justify-between">
+                            <div class="font-extrabold text-amber-600 text-base">
+                                <i class="fa-solid fa-coins mr-1"></i>${r.cost} điểm
+                            </div>
+                            <button onclick="confirmRedeemReward('${r.id}')" class="px-4 py-2 rounded-xl text-xs font-bold transition ${canAfford ? 'bg-slate-900 hover:bg-brand-orange text-white' : 'bg-slate-100 text-slate-400 cursor-not-allowed'}">
+                                ${canAfford ? 'Đổi ngay' : 'Chưa đủ điểm'}
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderPersonalHistory(user) {
+            // Profile Card Details
+            document.getElementById('profile-avatar').textContent = user.name.charAt(0).toUpperCase();
+            document.getElementById('profile-name').textContent = user.name;
+            document.getElementById('profile-email').textContent = user.email;
+            document.getElementById('profile-detail-name').textContent = user.name;
+            document.getElementById('profile-detail-class').textContent = user.className || 'Chưa cập nhật';
+            document.getElementById('profile-detail-phone').textContent = user.phone || 'Chưa cập nhật';
+
+            const roleBadge = document.getElementById('profile-role-badge');
+            if (user.role === 'admin') {
+                roleBadge.className = "px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800";
+                roleBadge.innerHTML = '<i class="fa-solid fa-crown mr-1"></i>Quản trị viên';
+            } else {
+                roleBadge.className = "px-2.5 py-0.5 rounded-full text-xs font-bold bg-slate-100 text-slate-700";
+                roleBadge.textContent = "Thành viên CLB";
+            }
+
+            // Runs
+            const myRuns = appState.runs.filter(r => r.userId === user.id);
+            document.getElementById('my-runs-list').innerHTML = myRuns.length
+                ? myRuns.map(r => `
+                    <div class="p-3 rounded-xl bg-slate-50 border border-slate-100 text-xs">
+                        <div class="flex justify-between font-bold text-slate-900">
+                            <span>${r.distance} km • ${r.duration} phút</span>
+                            <span class="text-brand-orange">+${r.pointsEarned}đ</span>
+                        </div>
+                        <div class="text-slate-500 mt-1">Pace: ${r.pace} /km • ${formatDate(r.createdAt)}</div>
+                        <div class="text-slate-600 italic mt-1">"${escapeHtml(r.note)}"</div>
+                    </div>
+                `).join('')
+                : `<div class="text-xs text-slate-400 text-center py-6">Bạn chưa ghi nhận buổi chạy nào.</div>`;
+
+            // Checkins
+            const myCheckins = appState.checkins.filter(c => c.userId === user.id);
+            document.getElementById('my-checkins-list').innerHTML = myCheckins.length
+                ? myCheckins.map(c => `
+                    <div class="p-3 rounded-xl bg-emerald-50/60 border border-emerald-100 text-xs flex items-center justify-between">
+                        <div>
+                            <div class="font-bold text-slate-900">Ngày ${c.date}</div>
+                            <div class="text-emerald-700 mt-0.5">Chuỗi ${c.streakCount} ngày liên tiếp</div>
+                        </div>
+                        <span class="font-extrabold text-emerald-700">+${c.pointsEarned}đ</span>
+                    </div>
+                `).join('')
+                : `<div class="text-xs text-slate-400 text-center py-6">Chưa có lịch sử điểm danh.</div>`;
+
+            // Redemptions
+            const myReds = appState.redemptions.filter(red => red.userId === user.id);
+            document.getElementById('my-redemptions-list').innerHTML = myReds.length
+                ? myReds.map(red => `
+                    <div class="p-3 rounded-xl bg-purple-50/50 border border-purple-100 text-xs">
+                        <div class="flex justify-between items-start gap-2">
+                            <span class="font-bold text-slate-900">${escapeHtml(red.rewardTitle)}</span>
+                            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${red.status === 'approved' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}">
+                                ${red.status === 'approved' ? 'Đã duyệt' : 'Chờ duyệt'}
+                            </span>
+                        </div>
+                        <div class="text-slate-500 mt-1">-${red.cost} điểm • ${formatDate(red.createdAt)}</div>
+                    </div>
+                `).join('')
+                : `<div class="text-xs text-slate-400 text-center py-6">Bạn chưa đổi phần quà nào.</div>`;
+        }
+
+        function renderAdminPanel() {
+            // Overview stats
+            document.getElementById('admin-stat-users').textContent = appState.users.length;
+            const totalClubKm = appState.users.reduce((sum, u) => sum + (u.totalKm || 0), 0);
+            document.getElementById('admin-stat-km').textContent = totalClubKm.toFixed(1);
+            const totalPoints = appState.users.reduce((sum, u) => sum + (u.points || 0), 0);
+            document.getElementById('admin-stat-points').textContent = totalPoints;
+            const pendingCount = appState.redemptions.filter(r => r.status === 'pending').length;
+            document.getElementById('admin-stat-pending').textContent = pendingCount;
+
+            // Search filter for Users Table
+            const searchInput = document.getElementById('admin-user-search');
+            const keyword = searchInput ? searchInput.value.trim().toLowerCase() : '';
+            const filteredUsers = appState.users.filter(u => {
+                if (!keyword) return true;
+                return (
+                    (u.name || '').toLowerCase().includes(keyword) ||
+                    (u.className || '').toLowerCase().includes(keyword) ||
+                    (u.phone || '').toLowerCase().includes(keyword) ||
+                    (u.email || '').toLowerCase().includes(keyword)
+                );
+            });
+
+            // Users Table
+            document.getElementById('admin-users-tbody').innerHTML = filteredUsers.length
+                ? filteredUsers.map(u => `
+                    <tr class="hover:bg-slate-50">
+                        <td class="py-3 px-3">
+                            <div class="font-bold text-slate-900">${escapeHtml(u.name)}</div>
+                            <div class="text-xs text-slate-400">${escapeHtml(u.email)}</div>
+                        </td>
+                        <td class="py-3 px-3">
+                            <div class="text-xs font-bold text-blue-700"><i class="fa-solid fa-graduation-cap mr-1"></i>${escapeHtml(u.className || 'Chưa có')}</div>
+                            <div class="text-xs font-semibold text-slate-600 mt-0.5"><i class="fa-solid fa-phone mr-1 text-emerald-600"></i>${escapeHtml(u.phone || 'Chưa có')}</div>
+                        </td>
+                        <td class="py-3 px-3">
+                            <div class="flex flex-wrap gap-1">
+                                <span class="px-2 py-0.5 rounded-full text-[11px] font-bold ${u.role === 'admin' ? 'bg-amber-100 text-amber-800' : 'bg-slate-100 text-slate-700'}">
+                                    ${u.role === 'admin' ? 'Quản trị viên' : 'Thành viên'}
+                                </span>
+                                <span class="px-2 py-0.5 rounded-full text-[11px] font-bold ${u.isLocked ? 'bg-red-100 text-red-700' : 'bg-emerald-100 text-emerald-700'}">
+                                    ${u.isLocked ? 'Đã khóa' : 'Hoạt động'}
+                                </span>
+                            </div>
+                        </td>
+                        <td class="py-3 px-3 text-right">
+                            <div class="font-extrabold text-amber-600">${u.points || 0} điểm</div>
+                            <div class="text-xs text-slate-500">${(u.totalKm || 0).toFixed(1)} km</div>
+                        </td>
+                        <td class="py-3 px-3 text-right">
+                            <div class="inline-flex flex-wrap justify-end gap-1.5">
+                                <button onclick="adminEditUserModal('${u.id}')" class="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-lg text-xs font-bold" title="Sửa Họ tên, Lớp, SĐT">
+                                    <i class="fa-solid fa-pen"></i> Sửa
+                                </button>
+                                <button onclick="adminAdjustPointsPrompt('${u.id}')" class="px-2.5 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg text-xs font-bold" title="Cộng/trừ điểm">
+                                    <i class="fa-solid fa-coins"></i> Điểm
+                                </button>
+                                <button onclick="adminToggleRole('${u.id}')" class="px-2.5 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-800 rounded-lg text-xs font-bold" title="Đổi quyền Admin">
+                                    <i class="fa-solid fa-crown"></i>
+                                </button>
+                                <button onclick="adminToggleLock('${u.id}')" class="px-2.5 py-1.5 ${u.isLocked ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700'} rounded-lg text-xs font-bold" title="Khóa/Mở khóa">
+                                    <i class="fa-solid ${u.isLocked ? 'fa-unlock' : 'fa-lock'}"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `).join('')
+                : `<tr><td colspan="5" class="py-6 text-center text-slate-400 text-xs">Không tìm thấy thành viên phù hợp với từ khóa "${escapeHtml(keyword)}".</td></tr>`;
+
+            // Admin Rewards List
+            document.getElementById('admin-rewards-list').innerHTML = appState.rewards.map(r => `
+                <div class="p-4 rounded-2xl border border-slate-200 flex items-center justify-between gap-3">
+                    <div>
+                        <div class="font-bold text-slate-900 text-sm">${escapeHtml(r.title)}</div>
+                        <div class="text-xs text-amber-600 font-bold mt-0.5">${r.cost} điểm</div>
+                        <div class="text-[11px] text-slate-400 mt-0.5">${escapeHtml(r.desc)}</div>
+                    </div>
+                    <button onclick="adminDeleteReward('${r.id}')" class="p-2 text-red-500 hover:bg-red-50 rounded-xl transition" title="Xóa quà">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                </div>
+            `).join('');
+
+            // Admin Redemptions Table (Includes Class & Phone for easy prize handover)
+            document.getElementById('admin-redemptions-tbody').innerHTML = appState.redemptions.length
+                ? appState.redemptions.map(red => {
+                    const userObj = appState.users.find(u => u.id === red.userId);
+                    const uClass = red.userClass || (userObj ? userObj.className : 'Chưa cập nhật');
+                    const uPhone = red.userPhone || (userObj ? userObj.phone : 'Chưa cập nhật');
+                    return `
+                        <tr class="hover:bg-slate-50">
+                            <td class="py-3 px-3">
+                                <div class="font-bold text-slate-900">${escapeHtml(red.userName)}</div>
+                                <div class="text-xs text-slate-500 mt-0.5">
+                                    <span class="font-semibold text-blue-700">${escapeHtml(uClass)}</span> • 
+                                    <span class="font-semibold text-emerald-700"><i class="fa-solid fa-phone text-[10px] mr-0.5"></i>${escapeHtml(uPhone)}</span>
+                                </div>
+                            </td>
+                            <td class="py-3 px-3">
+                                <span class="font-semibold text-slate-800">${escapeHtml(red.rewardTitle)}</span>
+                                <span class="text-xs text-amber-600 font-bold ml-1">(${red.cost}đ)</span>
+                            </td>
+                            <td class="py-3 px-3 text-xs text-slate-500">${formatDate(red.createdAt)}</td>
+                            <td class="py-3 px-3">
+                                <span class="px-2.5 py-1 rounded-full text-xs font-bold ${red.status === 'approved' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}">
+                                    ${red.status === 'approved' ? 'Đã duyệt giao quà' : 'Đang chờ duyệt'}
+                                </span>
+                            </td>
+                            <td class="py-3 px-3 text-right">
+                                ${red.status === 'pending'
+                                    ? `<button onclick="adminApproveRedemption('${red.id}')" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold">Duyệt ngay</button>`
+                                    : `<span class="text-xs text-slate-400"><i class="fa-solid fa-check"></i> Hoàn tất</span>`
+                                }
+                            </td>
+                        </tr>
+                    `;
+                }).join('')
+                : `<tr><td colspan="5" class="py-6 text-center text-slate-400 text-xs">Chưa có yêu cầu đổi quà nào.</td></tr>`;
+
+            // Admin Runs Moderation Table
+            document.getElementById('admin-runs-tbody').innerHTML = appState.runs.map(r => `
+                <tr class="hover:bg-slate-50">
+                    <td class="py-3 px-3">
+                        <div class="font-bold text-slate-900">${escapeHtml(r.userName)}</div>
+                        ${r.userClass ? `<div class="text-[11px] text-blue-600 font-semibold">${escapeHtml(r.userClass)}</div>` : ''}
+                    </td>
+                    <td class="py-3 px-3 font-bold text-brand-orange">${r.distance} km (+${r.pointsEarned}đ)</td>
+                    <td class="py-3 px-3 text-xs text-slate-600">${r.duration} phút (Pace ${r.pace})</td>
+                    <td class="py-3 px-3 text-xs text-slate-500 max-w-xs truncate">${escapeHtml(r.note)}</td>
+                    <td class="py-3 px-3 text-right">
+                        <button onclick="adminDeleteRun('${r.id}')" class="px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg text-xs font-bold">
+                            <i class="fa-solid fa-trash mr-1"></i>Xóa & Trừ điểm
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // ==========================================
+        // UI HELPERS (TOASTS, MODALS, FORMATTING)
+        // ==========================================
+        window.showToast = function(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const colors = {
+                success: 'bg-emerald-600 text-white',
+                error: 'bg-red-600 text-white',
+                info: 'bg-slate-900 text-white'
+            };
+            const icons = {
+                success: 'fa-circle-check',
+                error: 'fa-circle-exclamation',
+                info: 'fa-circle-info'
+            };
+
+            const toast = document.createElement('div');
+            toast.className = `${colors[type]} px-4 py-3 rounded-2xl shadow-xl flex items-center gap-3 text-sm font-medium pointer-events-auto fade-in`;
+            toast.innerHTML = `<i class="fa-solid ${icons[type]} text-base"></i><span>${escapeHtml(message)}</span>`;
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transition = 'opacity 0.3s';
+                setTimeout(() => toast.remove(), 300);
+            }, 3500);
+        };
+
+        window.openModal = function(title, bodyHtml, actions = []) {
+            document.getElementById('modal-title').textContent = title;
+            document.getElementById('modal-body').innerHTML = bodyHtml;
+            const actionsEl = document.getElementById('modal-actions');
+            actionsEl.innerHTML = '';
+            actions.forEach(act => {
+                const btn = document.createElement('button');
+                btn.textContent = act.label;
+                btn.className = act.class;
+                btn.onclick = act.onClick;
+                actionsEl.appendChild(btn);
+            });
+            const modal = document.getElementById('custom-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        };
+
+        window.closeModal = function() {
+            const modal = document.getElementById('custom-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        };
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;");
+        }
+
+        function formatDate(isoStr) {
+            if (!isoStr) return '';
+            const d = new Date(isoStr);
+            return d.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+        }
+
+        function formatTimeAgo(isoStr) {
+            const diffMin = Math.floor((Date.now() - new Date(isoStr).getTime()) / 60000);
+            if (diffMin < 1) return 'Vừa xong';
+            if (diffMin < 60) return `${diffMin} phút trước`;
+            const diffHr = Math.floor(diffMin / 60);
+            if (diffHr < 24) return `${diffHr} giờ trước`;
+            return `${Math.floor(diffHr / 24)} ngày trước`;
+        }
+
+        // Start App
+        window.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+</html>
