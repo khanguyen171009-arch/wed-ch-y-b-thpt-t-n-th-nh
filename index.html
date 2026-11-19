@@ -1,0 +1,1719 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>THPT Tân Thạnh - Điểm Danh & Chạy Bộ Tích Điểm</title>
+    <!-- Tải Tailwind CSS qua CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Tải Font Inter từ Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Tải Font Awesome cho biểu tượng -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+        /* Hiệu ứng chuyển mượt mà */
+        .fade-in {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        /* Tùy chỉnh thanh cuộn */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="text-slate-800 min-h-screen flex flex-col">
+
+    <!-- Hộp thông báo (Toast Notification) thay thế cho alert() -->
+    <div id="toast-container" class="fixed top-4 right-4 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none px-4 sm:px-0"></div>
+
+    <!-- Modal Xác Nhận Tùy Chỉnh thay thế cho confirm() -->
+    <div id="confirm-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-xl max-w-md w-full p-6 fade-in border border-slate-100">
+            <div class="flex items-center gap-3 text-amber-600 mb-3">
+                <div class="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center shrink-0">
+                    <i class="fa-solid fa-triangle-exclamation text-lg"></i>
+                </div>
+                <h3 id="confirm-title" class="text-lg font-bold text-slate-900">Xác nhận thao tác</h3>
+            </div>
+            <p id="confirm-message" class="text-slate-600 text-sm mb-6 leading-relaxed">Bạn có chắc chắn muốn thực hiện hành động này?</p>
+            <div class="flex justify-end gap-3">
+                <button id="confirm-cancel-btn" class="px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition">Hủy bỏ</button>
+                <button id="confirm-ok-btn" class="px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-rose-600 hover:bg-rose-700 transition shadow-sm">Xác nhận</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Chỉnh Sửa Học Sinh (Dành cho Admin) -->
+    <div id="edit-student-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-xl max-w-md w-full p-6 fade-in">
+            <div class="flex justify-between items-center mb-4 border-b border-slate-100 pb-3">
+                <h3 class="text-lg font-bold text-slate-900"><i class="fa-solid fa-user-pen text-blue-600 mr-2"></i>Chỉnh sửa thông tin học sinh</h3>
+                <button onclick="closeEditModal()" class="text-slate-400 hover:text-slate-600 p-1"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <form id="edit-student-form" class="space-y-4">
+                <input type="hidden" id="edit-student-id">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Họ và tên</label>
+                    <input type="text" id="edit-name" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none text-sm">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Lớp</label>
+                        <input type="text" id="edit-class" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none text-sm uppercase">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Số điện thoại</label>
+                        <input type="text" id="edit-phone" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none text-sm">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Tổng Km</label>
+                        <input type="number" step="0.1" min="0" id="edit-km" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Tổng Điểm</label>
+                        <input type="number" min="0" id="edit-points" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none text-sm">
+                    </div>
+                </div>
+                <div class="flex justify-end gap-2 pt-3 border-t border-slate-100">
+                    <button type="button" onclick="closeEditModal()" class="px-4 py-2 rounded-xl text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200">Đóng</button>
+                    <button type="submit" class="px-4 py-2 rounded-xl text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 shadow-sm">Lưu thay đổi</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Thanh Điều Hướng Trên Cùng (Header) -->
+    <header class="bg-gradient-to-r from-blue-700 via-blue-600 to-emerald-600 text-white shadow-md sticky top-0 z-40">
+        <div class="max-w-6xl mx-auto px-4 py-3.5 flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center shadow-inner">
+                    <i class="fa-solid fa-person-running text-xl text-amber-300"></i>
+                </div>
+                <div>
+                    <h1 class="font-extrabold text-base sm:text-lg tracking-tight leading-tight">TRƯỜNG THPT TÂN THẠNH</h1>
+                    <p class="text-xs text-blue-100 font-medium flex items-center gap-1.5">
+                        <span class="w-2 h-2 rounded-full bg-emerald-300 animate-pulse"></span>
+                        Hệ thống Điểm danh & Rèn luyện Chạy bộ
+                    </p>
+                </div>
+            </div>
+
+            <!-- Khu vực hiển thị trạng thái đăng nhập & Nút đăng xuất -->
+            <div id="nav-user-area" class="hidden items-center gap-3">
+                <div class="text-right hidden sm:block">
+                    <p id="nav-user-name" class="text-sm font-bold leading-none"></p>
+                    <p id="nav-user-role" class="text-xs text-blue-100 mt-1"></p>
+                </div>
+                <button onclick="handleLogout()" class="px-3.5 py-2 rounded-xl bg-white/15 hover:bg-white/25 text-white text-xs sm:text-sm font-semibold transition flex items-center gap-2 backdrop-blur-sm border border-white/20">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    <span>Đăng xuất</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- NỘI DUNG CHÍNH -->
+    <main class="flex-grow max-w-6xl w-full mx-auto px-4 py-6 sm:py-8">
+
+        <!-- ========================================================= -->
+        <!-- 1. MÀN HÌNH XÁC THỰC (ĐĂNG NHẬP / ĐĂNG KÝ / QUÊN MK / ADMIN) -->
+        <!-- ========================================================= -->
+        <section id="auth-section" class="max-w-md mx-auto fade-in">
+            <!-- Thẻ giới thiệu nhanh & Quy định -->
+            <div class="bg-gradient-to-br from-blue-50 to-emerald-50 border border-blue-100 rounded-2xl p-4 mb-6 shadow-sm">
+                <div class="flex items-start gap-3">
+                    <div class="p-2 bg-blue-600 text-white rounded-xl shrink-0 mt-0.5">
+                        <i class="fa-solid fa-shield-halved"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-sm font-bold text-slate-800">Phong trào Khỏe để Học tập & Lập nghiệp</h2>
+                        <p class="text-xs text-slate-600 mt-1 leading-relaxed">
+                            Dành riêng cho học sinh <strong class="text-blue-700">Trường THPT Tân Thạnh</strong>. Dữ liệu được mã hóa SHA-256 an toàn. Điểm tích lũy dùng để xét thi đua rèn luyện, <span class="text-rose-600 font-semibold">không quy đổi quà vật chất</span>.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Khung Form Chính -->
+            <div class="bg-white rounded-2xl shadow-lg border border-slate-100 overflow-hidden">
+                <!-- Tabs chuyển đổi chế độ -->
+                <div class="grid grid-cols-3 border-b border-slate-100 bg-slate-50/70 text-xs sm:text-sm font-semibold">
+                    <button id="tab-student-login" onclick="switchAuthTab('login')" class="py-3.5 text-center border-b-2 border-blue-600 text-blue-600 bg-white transition">
+                        <i class="fa-solid fa-right-to-bracket mr-1"></i> Học sinh
+                    </button>
+                    <button id="tab-student-register" onclick="switchAuthTab('register')" class="py-3.5 text-center border-b-2 border-transparent text-slate-500 hover:text-slate-700 transition">
+                        <i class="fa-solid fa-user-plus mr-1"></i> Đăng ký
+                    </button>
+                    <button id="tab-admin-login" onclick="switchAuthTab('admin')" class="py-3.5 text-center border-b-2 border-transparent text-slate-500 hover:text-amber-600 transition">
+                        <i class="fa-solid fa-user-shield mr-1"></i> Quản trị
+                    </button>
+                </div>
+
+                <!-- Cảnh báo khóa tạm thời khi nhập sai mật khẩu nhiều lần -->
+                <div id="lockout-banner" class="hidden bg-rose-50 border-b border-rose-200 px-5 py-3 text-rose-700 text-xs flex items-center gap-2.5">
+                    <i class="fa-solid fa-lock text-base shrink-0"></i>
+                    <div>
+                        <p class="font-bold">Tạm khóa đăng nhập do nhập sai nhiều lần!</p>
+                        <p>Vui lòng thử lại sau <span id="lockout-timer" class="font-extrabold underline">30</span> giây.</p>
+                    </div>
+                </div>
+
+                <!-- FORM 1: ĐĂNG NHẬP HỌC SINH -->
+                <form id="form-student-login" class="p-6 space-y-4">
+                    <div class="text-center mb-2">
+                        <h3 class="text-lg font-bold text-slate-800">Đăng nhập Học sinh</h3>
+                        <p class="text-xs text-slate-500">Sử dụng Số điện thoại và Mật khẩu đã đăng ký</p>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1.5">Số điện thoại</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400">
+                                <i class="fa-solid fa-phone"></i>
+                            </span>
+                            <input type="tel" id="login-phone" required placeholder="Nhập số điện thoại (VD: 0912345678)"
+                                class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none text-sm transition">
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="flex items-center justify-between mb-1.5">
+                            <label class="block text-xs font-semibold text-slate-700">Mật khẩu</label>
+                            <button type="button" onclick="switchAuthTab('forgot')" class="text-xs font-semibold text-blue-600 hover:text-blue-700 hover:underline">
+                                Quên mật khẩu?
+                            </button>
+                        </div>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400">
+                                <i class="fa-solid fa-key"></i>
+                            </span>
+                            <input type="password" id="login-password" required placeholder="••••••••"
+                                class="w-full pl-10 pr-10 py-2.5 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none text-sm transition">
+                            <button type="button" onclick="togglePasswordVisibility('login-password', this)" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600">
+                                <i class="fa-solid fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <button type="submit" id="btn-student-login" class="w-full py-3 rounded-xl bg-gradient-to-r from-blue-600 to-emerald-600 hover:from-blue-700 hover:to-emerald-700 text-white font-bold text-sm shadow-md hover:shadow-lg transition transform active:scale-[0.99]">
+                        Đăng nhập vào hệ thống
+                    </button>
+                </form>
+
+                <!-- FORM 1.5: KHÔI PHỤC MẬT KHẨU BẰNG SĐT (KHÔNG CẦN OTP) -->
+                <form id="form-forgot-password" class="p-6 space-y-4 hidden">
+                    <div class="text-center mb-2">
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-bold mb-2">
+                            <i class="fa-solid fa-key"></i> Khôi phục nhanh không cần OTP
+                        </span>
+                        <h3 class="text-lg font-bold text-slate-800">Đặt lại Mật khẩu</h3>
+                        <p class="text-xs text-slate-500">Nhập Số điện thoại đã đăng ký và mật khẩu mới</p>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1.5">Số điện thoại đã đăng ký <span class="text-rose-500">*</span></label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400">
+                                <i class="fa-solid fa-phone"></i>
+                            </span>
+                            <input type="tel" id="forgot-phone" required placeholder="Nhập số điện thoại tài khoản"
+                                class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none text-sm transition">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1.5">Mật khẩu mới <span class="text-rose-500">*</span></label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400">
+                                <i class="fa-solid fa-lock"></i>
+                            </span>
+                            <input type="password" id="forgot-new-password" required placeholder="Tối thiểu 6 ký tự"
+                                class="w-full pl-10 pr-10 py-2.5 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none text-sm transition">
+                            <button type="button" onclick="togglePasswordVisibility('forgot-new-password', this)" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600">
+                                <i class="fa-solid fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1.5">Xác nhận mật khẩu mới <span class="text-rose-500">*</span></label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400">
+                                <i class="fa-solid fa-shield-check"></i>
+                            </span>
+                            <input type="password" id="forgot-confirm-password" required placeholder="Nhập lại mật khẩu mới"
+                                class="w-full pl-10 pr-10 py-2.5 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none text-sm transition">
+                            <button type="button" onclick="togglePasswordVisibility('forgot-confirm-password', this)" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600">
+                                <i class="fa-solid fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm shadow-md transition">
+                        Đổi mật khẩu ngay
+                    </button>
+
+                    <div class="text-center pt-1">
+                        <button type="button" onclick="switchAuthTab('login')" class="text-xs font-semibold text-slate-500 hover:text-slate-800 inline-flex items-center gap-1">
+                            <i class="fa-solid fa-arrow-left"></i> Quay lại đăng nhập
+                        </button>
+                    </div>
+                </form>
+
+                <!-- FORM 2: ĐĂNG KÝ TÀI KHOẢN HỌC SINH -->
+                <form id="form-student-register" class="p-6 space-y-4 hidden">
+                    <div class="text-center mb-2">
+                        <h3 class="text-lg font-bold text-slate-800">Đăng ký Tài khoản Mới</h3>
+                        <p class="text-xs text-slate-500">Điền đầy đủ thông tin học sinh Trường THPT Tân Thạnh</p>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Trường học</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-emerald-600">
+                                <i class="fa-solid fa-school"></i>
+                            </span>
+                            <input type="text" value="Trường THPT Tân Thạnh" readonly
+                                class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-emerald-200 bg-emerald-50/70 text-emerald-900 font-semibold text-sm cursor-not-allowed">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Họ và tên học sinh <span class="text-rose-500">*</span></label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400">
+                                <i class="fa-solid fa-user"></i>
+                            </span>
+                            <input type="text" id="reg-name" required placeholder="VD: Nguyễn Văn An" maxlength="50"
+                                class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none text-sm">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Lớp học <span class="text-rose-500">*</span></label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400">
+                                    <i class="fa-solid fa-chalkboard-user"></i>
+                                </span>
+                                <input type="text" id="reg-class" required placeholder="VD: 10A1, 11B2" maxlength="10"
+                                    class="w-full pl-10 pr-3 py-2.5 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none text-sm uppercase">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Số điện thoại <span class="text-rose-500">*</span></label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400">
+                                    <i class="fa-solid fa-phone"></i>
+                                </span>
+                                <input type="tel" id="reg-phone" required placeholder="09xxxxxxxx" maxlength="11"
+                                    class="w-full pl-10 pr-3 py-2.5 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none text-sm">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Mật khẩu bảo mật <span class="text-rose-500">*</span></label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400">
+                                <i class="fa-solid fa-lock"></i>
+                            </span>
+                            <input type="password" id="reg-password" required placeholder="Tối thiểu 6 ký tự (chữ & số)" oninput="checkPasswordStrength(this.value)"
+                                class="w-full pl-10 pr-10 py-2.5 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none text-sm">
+                            <button type="button" onclick="togglePasswordVisibility('reg-password', this)" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600">
+                                <i class="fa-solid fa-eye"></i>
+                            </button>
+                        </div>
+                        <!-- Thanh đo độ mạnh mật khẩu -->
+                        <div class="mt-2">
+                            <div class="flex justify-between text-[11px] mb-1">
+                                <span class="text-slate-500">Độ mạnh mật khẩu:</span>
+                                <span id="pwd-strength-text" class="font-semibold text-slate-400">Chưa nhập</span>
+                            </div>
+                            <div class="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                                <div id="pwd-strength-bar" class="h-full w-0 bg-slate-300 transition-all duration-300"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm shadow-md transition">
+                        Hoàn tất Đăng ký Tài khoản
+                    </button>
+                </form>
+
+                <!-- FORM 3: ĐĂNG NHẬP QUẢN TRỊ VIÊN -->
+                <form id="form-admin-login" class="p-6 space-y-4 hidden">
+                    <div class="text-center mb-2">
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-100 text-amber-800 text-xs font-bold mb-2">
+                            <i class="fa-solid fa-crown"></i> Cổng Quản Trị Hệ Thống
+                        </span>
+                        <h3 class="text-lg font-bold text-slate-800">Đăng nhập Quản trị viên</h3>
+                        <p class="text-xs text-slate-500">Khu vực dành riêng cho Ban Quản Trị Trường THPT Tân Thạnh</p>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1.5">Tài khoản Quản trị</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-amber-600">
+                                <i class="fa-solid fa-user-tie"></i>
+                            </span>
+                            <input type="text" id="admin-username" required placeholder="Nhập tên tài khoản quản trị"
+                                class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 focus:border-amber-500 focus:ring-2 focus:ring-amber-200 outline-none text-sm">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1.5">Mật khẩu Quản trị</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-amber-600">
+                                <i class="fa-solid fa-shield-cat"></i>
+                            </span>
+                            <input type="password" id="admin-password" required placeholder="••••••••"
+                                class="w-full pl-10 pr-10 py-2.5 rounded-xl border border-slate-200 focus:border-amber-500 focus:ring-2 focus:ring-amber-200 outline-none text-sm">
+                            <button type="button" onclick="togglePasswordVisibility('admin-password', this)" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600">
+                                <i class="fa-solid fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <button type="submit" id="btn-admin-login" class="w-full py-3 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-bold text-sm shadow-md transition">
+                        Xác thực Quyền Quản Trị
+                    </button>
+                </form>
+            </div>
+        </section>
+
+        <!-- ========================================================= -->
+        <!-- 2. GIAO DIỆN HỌC SINH (SAU KHI ĐĂNG NHẬP)                 -->
+        <!-- ========================================================= -->
+        <section id="student-dashboard" class="hidden space-y-6 fade-in">
+            <!-- Banner Thông báo Quy định Tích điểm Không đổi quà -->
+            <div class="bg-amber-50 border-l-4 border-amber-500 rounded-r-2xl p-4 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div class="flex items-start sm:items-center gap-3">
+                    <i class="fa-solid fa-circle-info text-amber-600 text-xl shrink-0 mt-0.5 sm:mt-0"></i>
+                    <p class="text-xs sm:text-sm text-amber-900">
+                        <strong>Lưu ý quy chế:</strong> Điểm tích lũy từ việc điểm danh và chạy bộ chỉ dùng để <strong>xếp hạng thi đua & khen thưởng danh hiệu</strong> tại Trường THPT Tân Thạnh, <span class="underline font-bold text-rose-700">tuyệt đối không quy đổi thành quà tặng vật chất hay tiền mặt</span>.
+                    </p>
+                </div>
+                <span id="today-date-badge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white text-slate-700 text-xs font-bold shadow-sm shrink-0 border border-amber-200">
+                    <i class="fa-regular fa-calendar-check text-blue-600"></i>
+                    <span>--/--/----</span>
+                </span>
+            </div>
+
+            <!-- Thẻ Thông tin Cá nhân & Thống kê -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <!-- Thông tin học sinh -->
+                <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-100 flex items-center gap-4">
+                    <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white flex items-center justify-center text-2xl font-extrabold shadow-md shrink-0" id="stu-avatar">
+                        HS
+                    </div>
+                    <div class="min-w-0">
+                        <span class="inline-block px-2.5 py-0.5 rounded-md bg-blue-50 text-blue-700 text-xs font-bold mb-1" id="stu-class-badge">Lớp --</span>
+                        <h2 class="text-lg font-extrabold text-slate-900 truncate" id="stu-display-name">Học sinh</h2>
+                        <p class="text-xs text-slate-500 truncate"><i class="fa-solid fa-school mr-1 text-emerald-600"></i>Trường THPT Tân Thạnh</p>
+                    </div>
+                </div>
+
+                <!-- Tổng số Km -->
+                <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-100 flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Tổng quãng đường</p>
+                        <div class="flex items-baseline gap-1.5 mt-1">
+                            <span id="stu-total-km" class="text-3xl font-extrabold text-emerald-600">0.0</span>
+                            <span class="text-sm font-bold text-slate-400">km</span>
+                        </div>
+                        <p class="text-xs text-slate-400 mt-1">Quy đổi: 1 km = 10 điểm</p>
+                    </div>
+                    <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl">
+                        <i class="fa-solid fa-road"></i>
+                    </div>
+                </div>
+
+                <!-- Tổng điểm tích lũy -->
+                <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-100 flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Điểm thi đua tích lũy</p>
+                        <div class="flex items-baseline gap-1.5 mt-1">
+                            <span id="stu-total-points" class="text-3xl font-extrabold text-orange-500">0</span>
+                            <span class="text-sm font-bold text-slate-400">điểm</span>
+                        </div>
+                        <p class="text-xs text-emerald-600 font-medium mt-1"><i class="fa-solid fa-medal mr-1"></i>Điểm rèn luyện (Không đổi quà)</p>
+                    </div>
+                    <div class="w-12 h-12 rounded-2xl bg-orange-50 text-orange-500 flex items-center justify-center text-xl">
+                        <i class="fa-solid fa-star"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Khu vực Hành động Hàng ngày (Điểm danh & Nhập Km) -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Cột 1: Điểm danh hàng ngày -->
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-3">
+                            <h3 class="text-base font-bold text-slate-800 flex items-center gap-2">
+                                <span class="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center"><i class="fa-solid fa-calendar-check"></i></span>
+                                Điểm danh Rèn luyện Hôm nay
+                            </h3>
+                            <span id="checkin-status-pill" class="px-2.5 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-600">Chưa điểm danh</span>
+                        </div>
+                        <p class="text-xs text-slate-500 leading-relaxed mb-5">
+                            Mỗi ngày học sinh được điểm danh <strong>01 lần duy nhất</strong> để xác nhận tham gia rèn luyện thể thao và nhận ngay <strong class="text-blue-600">+5 điểm</strong> chuyên cần.
+                        </p>
+                    </div>
+
+                    <button id="btn-daily-checkin" onclick="handleDailyCheckin()" class="w-full py-3.5 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm shadow-md transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-hand-pointer"></i>
+                        <span>Điểm danh ngay (+5 điểm)</span>
+                    </button>
+                </div>
+
+                <!-- Cột 2: Nhập số Km chạy bộ hôm nay -->
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="text-base font-bold text-slate-800 flex items-center gap-2">
+                            <span class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center"><i class="fa-solid fa-person-running"></i></span>
+                            Ghi nhận Số Km Chạy bộ Hôm nay
+                        </h3>
+                        <span class="text-xs font-semibold text-slate-500">Tối đa: <strong class="text-slate-700">20 km/ngày</strong></span>
+                    </div>
+
+                    <form id="form-log-km" class="space-y-4">
+                        <div>
+                            <div class="flex justify-between text-xs mb-1.5">
+                                <label for="input-km" class="font-semibold text-slate-700">Số km đã chạy (VD: 2.5)</label>
+                                <span class="text-slate-500">Hôm nay đã nhập: <strong id="stu-today-km" class="text-emerald-600">0.0</strong> / 20 km</span>
+                            </div>
+                            <div class="flex gap-2">
+                                <div class="relative flex-grow">
+                                    <input type="number" id="input-km" step="0.1" min="0.1" max="20" required placeholder="Nhập số km..."
+                                        class="w-full pl-4 pr-12 py-3 rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none text-sm font-semibold">
+                                    <span class="absolute inset-y-0 right-0 pr-4 flex items-center text-xs font-bold text-slate-400">KM</span>
+                                </div>
+                                <button type="submit" class="px-5 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-md transition shrink-0">
+                                    <i class="fa-solid fa-plus mr-1"></i> Lưu Km
+                                </button>
+                            </div>
+                        </div>
+                        <p class="text-[11px] text-slate-400 flex items-center gap-1.5">
+                            <i class="fa-solid fa-shield-check text-emerald-500"></i>
+                            Hệ thống tự động kiểm tra giới hạn an toàn chống gian lận số liệu.
+                        </p>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Khu vực Bảng Xếp Hạng & Lịch Sử Hoạt Động -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <!-- Bảng xếp hạng toàn trường (7 cột) -->
+                <div class="lg:col-span-7 bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                    <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+                        <div>
+                            <h3 class="text-base font-bold text-slate-800 flex items-center gap-2">
+                                <i class="fa-solid fa-trophy text-amber-500"></i>
+                                Bảng Xếp Hạng Thi Đua THPT Tân Thạnh
+                            </h3>
+                            <p class="text-xs text-slate-500">Top học sinh tích cực rèn luyện nhất trường</p>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-50 text-slate-500 text-[11px] uppercase tracking-wider border-b border-slate-100">
+                                    <th class="py-3 px-4 font-bold">Hạng</th>
+                                    <th class="py-3 px-4 font-bold">Học sinh</th>
+                                    <th class="py-3 px-4 font-bold">Lớp</th>
+                                    <th class="py-3 px-4 font-bold text-right">Tổng Km</th>
+                                    <th class="py-3 px-4 font-bold text-right">Điểm</th>
+                                </tr>
+                            </thead>
+                            <tbody id="leaderboard-body" class="divide-y divide-slate-100 text-sm">
+                                <!-- Dữ liệu render bằng JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Lịch sử hoạt động cá nhân (5 cột) -->
+                <div class="lg:col-span-5 bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden flex flex-col">
+                    <div class="p-5 border-b border-slate-100 bg-slate-50/50">
+                        <h3 class="text-base font-bold text-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-clock-rotate-left text-blue-600"></i>
+                            Lịch sử Hoạt động của Bạn
+                        </h3>
+                        <p class="text-xs text-slate-500">Nhật ký điểm danh và chạy bộ gần đây</p>
+                    </div>
+                    <div id="student-history-list" class="p-4 space-y-3 max-h-96 overflow-y-auto flex-grow">
+                        <!-- Dữ liệu render bằng JS -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================================= -->
+        <!-- 3. GIAO DIỆN QUẢN TRỊ VIÊN                                -->
+        <!-- ========================================================= -->
+        <section id="admin-dashboard" class="hidden space-y-6 fade-in">
+            <!-- Header Quản trị -->
+            <div class="bg-slate-900 text-white rounded-2xl p-6 shadow-lg flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <div class="flex items-center gap-2 text-amber-400 text-xs font-bold uppercase tracking-wider mb-1">
+                        <i class="fa-solid fa-shield-halved"></i>
+                        <span>Hệ thống Quản trị Bảo mật Cao</span>
+                    </div>
+                    <h2 class="text-xl sm:text-2xl font-extrabold">Bảng Điều Khiển Quản Trị Viên</h2>
+                    <p class="text-xs sm:text-sm text-slate-300 mt-1">Quản lý dữ liệu chạy bộ & điểm danh học sinh Trường THPT Tân Thạnh</p>
+                </div>
+                <div class="flex flex-wrap gap-2">
+                    <button onclick="exportData('csv')" class="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition flex items-center gap-2 shadow-sm">
+                        <i class="fa-solid fa-file-csv text-sm"></i> Xuất Excel (CSV)
+                    </button>
+                    <button onclick="exportData('json')" class="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold transition flex items-center gap-2 shadow-sm">
+                        <i class="fa-solid fa-file-code text-sm"></i> Sao lưu JSON
+                    </button>
+                </div>
+            </div>
+
+            <!-- Thẻ Thống kê Tổng quan Toàn trường -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
+                    <div class="flex items-center justify-between">
+                        <p class="text-xs font-bold text-slate-500 uppercase">Tổng Học Sinh</p>
+                        <span class="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center"><i class="fa-solid fa-users"></i></span>
+                    </div>
+                    <p id="admin-stat-students" class="text-2xl font-extrabold text-slate-900 mt-2">0</p>
+                    <p class="text-xs text-slate-400 mt-1">Tài khoản đã đăng ký</p>
+                </div>
+
+                <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
+                    <div class="flex items-center justify-between">
+                        <p class="text-xs font-bold text-slate-500 uppercase">Điểm Danh Hôm Nay</p>
+                        <span class="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center"><i class="fa-solid fa-user-check"></i></span>
+                    </div>
+                    <p id="admin-stat-checkins" class="text-2xl font-extrabold text-emerald-600 mt-2">0</p>
+                    <p class="text-xs text-slate-400 mt-1">Học sinh hoạt động hôm nay</p>
+                </div>
+
+                <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
+                    <div class="flex items-center justify-between">
+                        <p class="text-xs font-bold text-slate-500 uppercase">Tổng Km Toàn Trường</p>
+                        <span class="w-9 h-9 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center"><i class="fa-solid fa-route"></i></span>
+                    </div>
+                    <p id="admin-stat-km" class="text-2xl font-extrabold text-orange-600 mt-2">0.0 km</p>
+                    <p class="text-xs text-slate-400 mt-1">Thành tích tích lũy chung</p>
+                </div>
+
+                <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
+                    <div class="flex items-center justify-between">
+                        <p class="text-xs font-bold text-slate-500 uppercase">Tổng Điểm Thi Đua</p>
+                        <span class="w-9 h-9 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center"><i class="fa-solid fa-award"></i></span>
+                    </div>
+                    <p id="admin-stat-points" class="text-2xl font-extrabold text-purple-600 mt-2">0</p>
+                    <p class="text-xs text-slate-400 mt-1">Điểm rèn luyện (Không đổi quà)</p>
+                </div>
+            </div>
+
+            <!-- Thanh Công Cụ Tìm Kiếm, Lọc & Thao Tác Hàng Loạt -->
+            <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-100 space-y-4">
+                <div class="flex flex-col md:flex-row gap-3 justify-between">
+                    <div class="flex flex-col sm:flex-row gap-3 flex-grow">
+                        <!-- Tìm kiếm tên / SĐT -->
+                        <div class="relative flex-grow max-w-md">
+                            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400">
+                                <i class="fa-solid fa-magnifying-glass"></i>
+                            </span>
+                            <input type="text" id="admin-search-input" oninput="renderAdminTable()" placeholder="Tìm theo tên học sinh hoặc SĐT..."
+                                class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none text-sm">
+                        </div>
+
+                        <!-- Lọc theo lớp -->
+                        <select id="admin-filter-class" onchange="renderAdminTable()" class="px-4 py-2.5 rounded-xl border border-slate-200 focus:border-blue-500 outline-none text-sm font-medium bg-white">
+                            <option value="ALL">Tất cả các lớp</option>
+                        </select>
+                    </div>
+
+                    <!-- Nút Reset toàn bộ điểm thi đua (Mùa giải mới) -->
+                    <button onclick="confirmResetAllPoints()" class="px-4 py-2.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 text-xs font-bold transition flex items-center justify-center gap-2 shrink-0">
+                        <i class="fa-solid fa-rotate-left"></i> Reset Điểm Toàn Trường
+                    </button>
+                </div>
+
+                <!-- Bảng Danh Sách Học Sinh -->
+                <div class="overflow-x-auto rounded-xl border border-slate-100">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-50 text-slate-600 text-xs uppercase tracking-wider border-b border-slate-200">
+                                <th class="py-3.5 px-4 font-bold">Học sinh</th>
+                                <th class="py-3.5 px-4 font-bold">Lớp</th>
+                                <th class="py-3.5 px-4 font-bold">Số điện thoại</th>
+                                <th class="py-3.5 px-4 font-bold text-center">Điểm danh hôm nay</th>
+                                <th class="py-3.5 px-4 font-bold text-right">Tổng Km</th>
+                                <th class="py-3.5 px-4 font-bold text-right">Tổng Điểm</th>
+                                <th class="py-3.5 px-4 font-bold text-center">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-students-table" class="divide-y divide-slate-100 text-sm">
+                            <!-- Dữ liệu render bằng JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 py-5 mt-auto">
+        <div class="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-500">
+            <p>© 2026 <strong>Trường Trung học Phổ thông Tân Thạnh</strong>. Hệ thống Rèn luyện Thể chất Học đường.</p>
+            <p class="flex items-center gap-1.5">
+                <i class="fa-solid fa-lock text-emerald-600"></i>
+                Bảo mật SHA-256 & Chống XSS • Điểm tích lũy không quy đổi quà
+            </p>
+        </div>
+    </footer>
+
+    <!-- ========================================================= -->
+    <!-- MÃ JAVASCRIPT XỬ LÝ LOGIC & BẢO MẬT                       -->
+    <!-- ========================================================= -->
+    <script>
+        /**
+         * CẤU HÌNH HỆ THỐNG & HẰNG SỐ BẢO MẬT
+         */
+        const STORAGE_KEY_STUDENTS = 'thpt_tanthanh_students_v1';
+        const STORAGE_KEY_SESSION = 'thpt_tanthanh_session_v1';
+        const STORAGE_KEY_LOCKOUT = 'thpt_tanthanh_lockout_v1';
+
+        // Danh sách tài khoản quản trị viên (mật khẩu sẽ được băm SHA-256 khi khởi chạy)
+        const ADMIN_CREDENTIALS = [
+            { username: 'khanguyen', rawPassword: '090909!!', passwordHash: '' },
+            { username: 'admin2@krun', rawPassword: '191126', passwordHash: '' }
+        ];
+
+        const POINTS_PER_CHECKIN = 5;
+        const POINTS_PER_KM = 10;
+        const MAX_DAILY_KM = 20;
+        const MAX_LOGIN_ATTEMPTS = 5;
+        const LOCKOUT_DURATION_SEC = 30;
+
+        /**
+         * TIỆN ÍCH BẢO MẬT (WEB CRYPTO SHA-256 & CHỐNG XSS)
+         */
+
+        // Hàm băm chuỗi bằng thuật toán SHA-256 chuẩn Web Crypto API
+        async function sha256(message) {
+            const msgBuffer = new TextEncoder().encode(message);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        // Hàm làm sạch chuỗi đầu vào để phòng chống tấn công XSS (Cross-Site Scripting)
+        function sanitizeHTML(str) {
+            if (typeof str !== 'string') return '';
+            const temp = document.createElement('div');
+            temp.textContent = str;
+            return temp.innerHTML;
+        }
+
+        // Lấy ngày hôm nay theo định dạng YYYY-MM-DD (giờ địa phương)
+        function getTodayISO() {
+            const now = new Date();
+            const offset = now.getTimezoneOffset();
+            const local = new Date(now.getTime() - (offset * 60 * 1000));
+            return local.toISOString().split('T')[0];
+        }
+
+        // Định dạng ngày hiển thị DD/MM/YYYY
+        function formatDateVN(isoDate) {
+            if (!isoDate) return '';
+            const parts = isoDate.split('-');
+            if (parts.length !== 3) return isoDate;
+            return `${parts[2]}/${parts[1]}/${parts[0]}`;
+        }
+
+        /**
+         * HỆ THỐNG THÔNG BÁO (TOAST) & HỘP THOẠI XÁC NHẬN
+         */
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+
+            const styles = {
+                success: 'bg-emerald-600 text-white border-emerald-700',
+                error: 'bg-rose-600 text-white border-rose-700',
+                warning: 'bg-amber-500 text-white border-amber-600',
+                info: 'bg-blue-600 text-white border-blue-700'
+            };
+
+            const icons = {
+                success: 'fa-circle-check',
+                error: 'fa-circle-exclamation',
+                warning: 'fa-triangle-exclamation',
+                info: 'fa-circle-info'
+            };
+
+            toast.className = `${styles[type] || styles.info} pointer-events-auto flex items-center gap-3 px-4 py-3 rounded-xl shadow-lg border text-sm font-medium fade-in`;
+            toast.innerHTML = `
+                <i class="fa-solid ${icons[type] || icons.info} text-base shrink-0"></i>
+                <span class="leading-snug">${sanitizeHTML(message)}</span>
+            `;
+
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(20px)';
+                toast.style.transition = 'all 0.3s ease';
+                setTimeout(() => toast.remove(), 300);
+            }, 3500);
+        }
+
+        // Hộp thoại xác nhận bất đồng bộ thay thế confirm()
+        function showConfirmDialog(title, message, onConfirm) {
+            const modal = document.getElementById('confirm-modal');
+            document.getElementById('confirm-title').textContent = title;
+            document.getElementById('confirm-message').textContent = message;
+
+            const okBtn = document.getElementById('confirm-ok-btn');
+            const cancelBtn = document.getElementById('confirm-cancel-btn');
+
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+
+            const cleanup = () => {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+                okBtn.onclick = null;
+                cancelBtn.onclick = null;
+            };
+
+            cancelBtn.onclick = cleanup;
+            okBtn.onclick = () => {
+                cleanup();
+                onConfirm();
+            };
+        }
+
+        /**
+         * QUẢN LÝ DỮ LIỆU CỤC BỘ (LOCALSTORAGE) & DỮ LIỆU MẪU BAN ĐẦU
+         */
+        function getStudents() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY_STUDENTS);
+                return raw ? JSON.parse(raw) : [];
+            } catch (e) {
+                console.error('Lỗi đọc dữ liệu:', e);
+                return [];
+            }
+        }
+
+        function saveStudents(students) {
+            try {
+                localStorage.setItem(STORAGE_KEY_STUDENTS, JSON.stringify(students));
+            } catch (e) {
+                showToast('Không thể lưu dữ liệu vào trình duyệt!', 'error');
+            }
+        }
+
+        // Khởi tạo dữ liệu mẫu để bảng xếp hạng sinh động nếu hệ thống chưa có học sinh nào
+        async function seedInitialDataIfEmpty() {
+            const students = getStudents();
+            if (students.length === 0) {
+                const defaultPwdHash = await sha256('123456');
+                const today = getTodayISO();
+                const sampleStudents = [
+                    {
+                        id: 'stu_sample_1',
+                        name: 'Lê Minh Khôi',
+                        className: '12A1',
+                        phone: '0901000001',
+                        school: 'Trường THPT Tân Thạnh',
+                        passwordHash: defaultPwdHash,
+                        totalKm: 18.5,
+                        totalPoints: 200,
+                        lastCheckinDate: today,
+                        dailyKmMap: { [today]: 3.5 },
+                        history: [
+                            { date: today, type: 'run', desc: 'Chạy bộ 3.5 km (+35 điểm)' },
+                            { date: today, type: 'checkin', desc: 'Điểm danh hàng ngày (+5 điểm)' }
+                        ]
+                    },
+                    {
+                        id: 'stu_sample_2',
+                        name: 'Trần Ngọc Hân',
+                        className: '11B2',
+                        phone: '0901000002',
+                        school: 'Trường THPT Tân Thạnh',
+                        passwordHash: defaultPwdHash,
+                        totalKm: 14.0,
+                        totalPoints: 155,
+                        lastCheckinDate: today,
+                        dailyKmMap: { [today]: 2.0 },
+                        history: [
+                            { date: today, type: 'run', desc: 'Chạy bộ 2.0 km (+20 điểm)' },
+                            { date: today, type: 'checkin', desc: 'Điểm danh hàng ngày (+5 điểm)' }
+                        ]
+                    },
+                    {
+                        id: 'stu_sample_3',
+                        name: 'Phạm Hoàng Nam',
+                        className: '10A3',
+                        phone: '0901000003',
+                        school: 'Trường THPT Tân Thạnh',
+                        passwordHash: defaultPwdHash,
+                        totalKm: 9.2,
+                        totalPoints: 102,
+                        lastCheckinDate: '',
+                        dailyKmMap: {},
+                        history: [
+                            { date: '2026-11-18', type: 'run', desc: 'Chạy bộ 4.2 km (+42 điểm)' }
+                        ]
+                    }
+                ];
+                saveStudents(sampleStudents);
+            }
+        }
+
+        /**
+         * CƠ CHẾ CHỐNG DÒ MẬT KHẨU (RATE LIMITING / LOCKOUT)
+         */
+        let lockoutInterval = null;
+
+        function getLockoutState() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY_LOCKOUT);
+                return raw ? JSON.parse(raw) : { attempts: 0, lockedUntil: 0 };
+            } catch {
+                return { attempts: 0, lockedUntil: 0 };
+            }
+        }
+
+        function setLockoutState(state) {
+            localStorage.setItem(STORAGE_KEY_LOCKOUT, JSON.stringify(state));
+        }
+
+        function registerFailedAttempt() {
+            const state = getLockoutState();
+            state.attempts += 1;
+            if (state.attempts >= MAX_LOGIN_ATTEMPTS) {
+                state.lockedUntil = Date.now() + LOCKOUT_DURATION_SEC * 1000;
+                state.attempts = 0;
+                showToast(`Nhập sai quá ${MAX_LOGIN_ATTEMPTS} lần! Khóa đăng nhập trong ${LOCKOUT_DURATION_SEC} giây.`, 'error');
+            } else {
+                const left = MAX_LOGIN_ATTEMPTS - state.attempts;
+                showToast(`Sai thông tin đăng nhập! Bạn còn ${left} lần thử.`, 'warning');
+            }
+            setLockoutState(state);
+            checkLockoutUI();
+        }
+
+        function resetFailedAttempts() {
+            setLockoutState({ attempts: 0, lockedUntil: 0 });
+            checkLockoutUI();
+        }
+
+        function isLoginLocked() {
+            const state = getLockoutState();
+            return state.lockedUntil > Date.now();
+        }
+
+        function checkLockoutUI() {
+            const banner = document.getElementById('lockout-banner');
+            const timerSpan = document.getElementById('lockout-timer');
+            const btnStudent = document.getElementById('btn-student-login');
+            const btnAdmin = document.getElementById('btn-admin-login');
+
+            if (lockoutInterval) clearInterval(lockoutInterval);
+
+            const update = () => {
+                const state = getLockoutState();
+                const remaining = Math.ceil((state.lockedUntil - Date.now()) / 1000);
+                if (remaining > 0) {
+                    banner.classList.remove('hidden');
+                    timerSpan.textContent = remaining;
+                    btnStudent.disabled = true;
+                    btnAdmin.disabled = true;
+                    btnStudent.classList.add('opacity-50', 'cursor-not-allowed');
+                    btnAdmin.classList.add('opacity-50', 'cursor-not-allowed');
+                } else {
+                    banner.classList.add('hidden');
+                    btnStudent.disabled = false;
+                    btnAdmin.disabled = false;
+                    btnStudent.classList.remove('opacity-50', 'cursor-not-allowed');
+                    btnAdmin.classList.remove('opacity-50', 'cursor-not-allowed');
+                    clearInterval(lockoutInterval);
+                }
+            };
+
+            update();
+            if (isLoginLocked()) {
+                lockoutInterval = setInterval(update, 1000);
+            }
+        }
+
+        /**
+         * XỬ LÝ GIAO DIỆN XÁC THỰC (TABS, MẬT KHẨU, ĐĂNG KÝ, ĐĂNG NHẬP, QUÊN MẬT KHẨU)
+         */
+        function switchAuthTab(tab) {
+            const allForms = [
+                'form-student-login',
+                'form-forgot-password',
+                'form-student-register',
+                'form-admin-login'
+            ];
+
+            const tabs = {
+                login: { btn: 'tab-student-login', form: 'form-student-login', activeClass: 'border-blue-600 text-blue-600 bg-white' },
+                forgot: { btn: 'tab-student-login', form: 'form-forgot-password', activeClass: 'border-blue-600 text-blue-600 bg-white' },
+                register: { btn: 'tab-student-register', form: 'form-student-register', activeClass: 'border-blue-600 text-blue-600 bg-white' },
+                admin: { btn: 'tab-admin-login', form: 'form-admin-login', activeClass: 'border-amber-500 text-amber-600 bg-white' }
+            };
+
+            // Ẩn toàn bộ form và reset trạng thái các tab
+            allForms.forEach(formId => document.getElementById(formId).classList.add('hidden'));
+            ['tab-student-login', 'tab-student-register', 'tab-admin-login'].forEach(btnId => {
+                document.getElementById(btnId).className = 'py-3.5 text-center border-b-2 border-transparent text-slate-500 hover:text-slate-700 transition';
+            });
+
+            const current = tabs[tab] || tabs.login;
+            document.getElementById(current.btn).className = `py-3.5 text-center border-b-2 transition ${current.activeClass}`;
+            document.getElementById(current.form).classList.remove('hidden');
+
+            // Tự động điền SĐT nếu người dùng đã gõ ở form đăng nhập
+            if (tab === 'forgot') {
+                const typedPhone = document.getElementById('login-phone').value.trim();
+                if (typedPhone) {
+                    document.getElementById('forgot-phone').value = typedPhone;
+                }
+            }
+        }
+
+        function togglePasswordVisibility(inputId, btn) {
+            const input = document.getElementById(inputId);
+            const icon = btn.querySelector('i');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.replace('fa-eye', 'fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.replace('fa-eye-slash', 'fa-eye');
+            }
+        }
+
+        function checkPasswordStrength(pwd) {
+            const bar = document.getElementById('pwd-strength-bar');
+            const text = document.getElementById('pwd-strength-text');
+
+            if (!pwd) {
+                bar.style.width = '0%';
+                bar.className = 'h-full w-0 bg-slate-300 transition-all duration-300';
+                text.textContent = 'Chưa nhập';
+                text.className = 'font-semibold text-slate-400';
+                return;
+            }
+
+            let score = 0;
+            if (pwd.length >= 6) score += 1;
+            if (pwd.length >= 8) score += 1;
+            if (/[A-Z]/.test(pwd) && /[a-z]/.test(pwd)) score += 1;
+            if (/[0-9]/.test(pwd)) score += 1;
+            if (/[^A-Za-z0-9]/.test(pwd)) score += 1;
+
+            if (score <= 2) {
+                bar.style.width = '33%';
+                bar.className = 'h-full bg-rose-500 transition-all duration-300';
+                text.textContent = 'Yếu';
+                text.className = 'font-semibold text-rose-600';
+            } else if (score <= 3) {
+                bar.style.width = '66%';
+                bar.className = 'h-full bg-amber-500 transition-all duration-300';
+                text.textContent = 'Trung bình';
+                text.className = 'font-semibold text-amber-600';
+            } else {
+                bar.style.width = '100%';
+                bar.className = 'h-full bg-emerald-500 transition-all duration-300';
+                text.textContent = 'Mạnh (An toàn)';
+                text.className = 'font-semibold text-emerald-600';
+            }
+        }
+
+        // Xử lý Khôi phục mật khẩu bằng SĐT không cần OTP
+        document.getElementById('form-forgot-password').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const phone = document.getElementById('forgot-phone').value.trim();
+            const newPassword = document.getElementById('forgot-new-password').value;
+            const confirmPassword = document.getElementById('forgot-confirm-password').value;
+
+            if (!/^(0[3|5|7|8|9])+([0-9]{8})$/.test(phone)) {
+                showToast('Số điện thoại không hợp lệ (10 số)!', 'warning');
+                return;
+            }
+
+            if (newPassword.length < 6) {
+                showToast('Mật khẩu mới phải có ít nhất 6 ký tự!', 'warning');
+                return;
+            }
+
+            if (newPassword !== confirmPassword) {
+                showToast('Mật khẩu xác nhận không khớp!', 'error');
+                return;
+            }
+
+            const students = getStudents();
+            const idx = students.findIndex(s => s.phone === phone);
+
+            if (idx === -1) {
+                showToast('Không tìm thấy tài khoản nào đăng ký với số điện thoại này!', 'error');
+                return;
+            }
+
+            // Cập nhật mật khẩu mới đã băm SHA-256
+            students[idx].passwordHash = await sha256(newPassword);
+            students[idx].history.unshift({
+                date: getTodayISO(),
+                type: 'info',
+                desc: 'Khôi phục và đặt lại mật khẩu mới qua SĐT'
+            });
+
+            saveStudents(students);
+            resetFailedAttempts();
+            this.reset();
+            showToast(`Đã đặt lại mật khẩu cho ${students[idx].name}! Vui lòng đăng nhập.`, 'success');
+            switchAuthTab('login');
+            document.getElementById('login-phone').value = phone;
+        });
+
+        // Xử lý Đăng ký Học sinh
+        document.getElementById('form-student-register').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const rawName = document.getElementById('reg-name').value.trim();
+            const rawClass = document.getElementById('reg-class').value.trim().toUpperCase();
+            const rawPhone = document.getElementById('reg-phone').value.trim();
+            const password = document.getElementById('reg-password').value;
+
+            // Kiểm tra hợp lệ dữ liệu
+            if (rawName.length < 2) {
+                showToast('Vui lòng nhập họ và tên hợp lệ!', 'warning');
+                return;
+            }
+            if (!/^[0-9]{2}[A-Z0-9]{1,6}$/.test(rawClass)) {
+                showToast('Tên lớp không hợp lệ (Ví dụ đúng: 10A1, 11B2, 12C3)!', 'warning');
+                return;
+            }
+            if (!/^(0[3|5|7|8|9])+([0-9]{8})$/.test(rawPhone)) {
+                showToast('Số điện thoại Việt Nam không hợp lệ (10 số, bắt đầu bằng 03, 05, 07, 08, 09)!', 'warning');
+                return;
+            }
+            if (password.length < 6) {
+                showToast('Mật khẩu phải có ít nhất 6 ký tự để đảm bảo bảo mật!', 'warning');
+                return;
+            }
+
+            const students = getStudents();
+            if (students.some(s => s.phone === rawPhone)) {
+                showToast('Số điện thoại này đã được đăng ký tài khoản!', 'error');
+                return;
+            }
+
+            // Mã hóa mật khẩu bằng SHA-256
+            const passwordHash = await sha256(password);
+
+            const newStudent = {
+                id: 'stu_' + Date.now(),
+                name: rawName,
+                className: rawClass,
+                phone: rawPhone,
+                school: 'Trường THPT Tân Thạnh',
+                passwordHash: passwordHash,
+                totalKm: 0,
+                totalPoints: 0,
+                lastCheckinDate: '',
+                dailyKmMap: {},
+                history: [
+                    { date: getTodayISO(), type: 'info', desc: 'Đăng ký tài khoản thành viên THPT Tân Thạnh' }
+                ]
+            };
+
+            students.push(newStudent);
+            saveStudents(students);
+
+            this.reset();
+            checkPasswordStrength('');
+            showToast('Đăng ký thành công! Vui lòng đăng nhập bằng SĐT và mật khẩu.', 'success');
+            switchAuthTab('login');
+            document.getElementById('login-phone').value = rawPhone;
+        });
+
+        // Xử lý Đăng nhập Học sinh
+        document.getElementById('form-student-login').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            if (isLoginLocked()) return;
+
+            const phone = document.getElementById('login-phone').value.trim();
+            const password = document.getElementById('login-password').value;
+
+            const inputHash = await sha256(password);
+            const students = getStudents();
+            const student = students.find(s => s.phone === phone && s.passwordHash === inputHash);
+
+            if (!student) {
+                registerFailedAttempt();
+                return;
+            }
+
+            resetFailedAttempts();
+            this.reset();
+            setSession({ role: 'student', userId: student.id });
+            showToast(`Chào mừng ${student.name} (${student.className}) quay trở lại!`, 'success');
+            renderApp();
+        });
+
+        // Xử lý Đăng nhập Quản trị viên (khanguyen & admin2@krun)
+        document.getElementById('form-admin-login').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            if (isLoginLocked()) return;
+
+            const username = document.getElementById('admin-username').value.trim();
+            const password = document.getElementById('admin-password').value;
+
+            const inputHash = await sha256(password);
+            const matchedAdmin = ADMIN_CREDENTIALS.find(
+                acc => acc.username === username && acc.passwordHash === inputHash
+            );
+
+            if (matchedAdmin) {
+                resetFailedAttempts();
+                this.reset();
+                setSession({ role: 'admin', username: matchedAdmin.username });
+                showToast(`Đăng nhập Quản trị viên (${matchedAdmin.username}) thành công!`, 'success');
+                renderApp();
+            } else {
+                registerFailedAttempt();
+            }
+        });
+
+        /**
+         * QUẢN LÝ PHIÊN ĐĂNG NHẬP (SESSION)
+         */
+        function setSession(sessionObj) {
+            sessionStorage.setItem(STORAGE_KEY_SESSION, JSON.stringify(sessionObj));
+        }
+
+        function getSession() {
+            try {
+                const raw = sessionStorage.getItem(STORAGE_KEY_SESSION);
+                return raw ? JSON.parse(raw) : null;
+            } catch {
+                return null;
+            }
+        }
+
+        function handleLogout() {
+            sessionStorage.removeItem(STORAGE_KEY_SESSION);
+            showToast('Đã đăng xuất an toàn khỏi hệ thống.', 'info');
+            renderApp();
+        }
+
+        /**
+         * CHỨC NĂNG DÀNH CHO HỌC SINH (ĐIỂM DANH, NHẬP KM, BẢNG XẾP HẠNG)
+         */
+        function renderStudentDashboard(studentId) {
+            const students = getStudents();
+            const student = students.find(s => s.id === studentId);
+
+            if (!student) {
+                handleLogout();
+                return;
+            }
+
+            const today = getTodayISO();
+            document.getElementById('today-date-badge').querySelector('span').textContent = formatDateVN(today);
+
+            // Cập nhật Header
+            document.getElementById('nav-user-name').textContent = student.name;
+            document.getElementById('nav-user-role').textContent = `Học sinh • Lớp ${student.className}`;
+
+            // Cập nhật thông tin thẻ cá nhân
+            const nameParts = student.name.trim().split(' ');
+            const initials = nameParts.length >= 2
+                ? (nameParts[0][0] + nameParts[nameParts.length - 1][0]).toUpperCase()
+                : student.name.substring(0, 2).toUpperCase();
+
+            document.getElementById('stu-avatar').textContent = initials;
+            document.getElementById('stu-class-badge').textContent = `Lớp ${student.className}`;
+            document.getElementById('stu-display-name').textContent = student.name;
+            document.getElementById('stu-total-km').textContent = student.totalKm.toFixed(1);
+            document.getElementById('stu-total-points').textContent = student.totalPoints.toLocaleString('vi-VN');
+
+            // Trạng thái điểm danh hôm nay
+            const isCheckedInToday = student.lastCheckinDate === today;
+            const checkinBtn = document.getElementById('btn-daily-checkin');
+            const checkinPill = document.getElementById('checkin-status-pill');
+
+            if (isCheckedInToday) {
+                checkinPill.textContent = 'Đã điểm danh hôm nay';
+                checkinPill.className = 'px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700';
+                checkinBtn.disabled = true;
+                checkinBtn.className = 'w-full py-3.5 px-4 rounded-xl bg-slate-100 text-slate-400 font-bold text-sm cursor-not-allowed flex items-center justify-center gap-2 border border-slate-200';
+                checkinBtn.innerHTML = '<i class="fa-solid fa-circle-check text-emerald-500"></i><span>Bạn đã điểm danh hôm nay rồi</span>';
+            } else {
+                checkinPill.textContent = 'Chưa điểm danh';
+                checkinPill.className = 'px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-700';
+                checkinBtn.disabled = false;
+                checkinBtn.className = 'w-full py-3.5 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm shadow-md transition flex items-center justify-center gap-2';
+                checkinBtn.innerHTML = `<i class="fa-solid fa-hand-pointer"></i><span>Điểm danh ngay (+${POINTS_PER_CHECKIN} điểm)</span>`;
+            }
+
+            // Số km đã chạy hôm nay
+            const todayKm = (student.dailyKmMap && student.dailyKmMap[today]) ? student.dailyKmMap[today] : 0;
+            document.getElementById('stu-today-km').textContent = todayKm.toFixed(1);
+
+            // Render Bảng xếp hạng
+            renderLeaderboard(students, student.id);
+
+            // Render Lịch sử hoạt động cá nhân
+            renderStudentHistory(student);
+        }
+
+        // Xử lý Điểm danh hàng ngày
+        function handleDailyCheckin() {
+            const session = getSession();
+            if (!session || session.role !== 'student') return;
+
+            const students = getStudents();
+            const idx = students.findIndex(s => s.id === session.userId);
+            if (idx === -1) return;
+
+            const today = getTodayISO();
+            if (students[idx].lastCheckinDate === today) {
+                showToast('Hôm nay bạn đã điểm danh rồi!', 'warning');
+                return;
+            }
+
+            students[idx].lastCheckinDate = today;
+            students[idx].totalPoints += POINTS_PER_CHECKIN;
+            students[idx].history.unshift({
+                date: today,
+                type: 'checkin',
+                desc: `Điểm danh rèn luyện hàng ngày (+${POINTS_PER_CHECKIN} điểm)`
+            });
+
+            saveStudents(students);
+            showToast(`Điểm danh thành công! Bạn nhận được +${POINTS_PER_CHECKIN} điểm thi đua.`, 'success');
+            renderStudentDashboard(session.userId);
+        }
+
+        // Xử lý Nhập số Km chạy bộ hôm nay
+        document.getElementById('form-log-km').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const session = getSession();
+            if (!session || session.role !== 'student') return;
+
+            const kmInput = parseFloat(document.getElementById('input-km').value);
+            if (isNaN(kmInput) || kmInput <= 0) {
+                showToast('Vui lòng nhập số km lớn hơn 0!', 'warning');
+                return;
+            }
+
+            // Làm tròn 1 chữ số thập phân
+            const kmValue = Math.round(kmInput * 10) / 10;
+
+            const students = getStudents();
+            const idx = students.findIndex(s => s.id === session.userId);
+            if (idx === -1) return;
+
+            const today = getTodayISO();
+            if (!students[idx].dailyKmMap) students[idx].dailyKmMap = {};
+
+            const currentTodayKm = students[idx].dailyKmMap[today] || 0;
+            if (currentTodayKm + kmValue > MAX_DAILY_KM) {
+                const remain = Math.max(0, MAX_DAILY_KM - currentTodayKm).toFixed(1);
+                showToast(`Vượt giới hạn ${MAX_DAILY_KM} km/ngày! Hôm nay bạn chỉ có thể nhập thêm tối đa ${remain} km.`, 'error');
+                return;
+            }
+
+            const earnedPoints = Math.round(kmValue * POINTS_PER_KM);
+
+            students[idx].dailyKmMap[today] = Math.round((currentTodayKm + kmValue) * 10) / 10;
+            students[idx].totalKm = Math.round((students[idx].totalKm + kmValue) * 10) / 10;
+            students[idx].totalPoints += earnedPoints;
+            students[idx].history.unshift({
+                date: today,
+                type: 'run',
+                desc: `Ghi nhận chạy bộ ${kmValue.toFixed(1)} km (+${earnedPoints} điểm)`
+            });
+
+            saveStudents(students);
+            this.reset();
+            showToast(`Tuyệt vời! Đã lưu ${kmValue.toFixed(1)} km (+${earnedPoints} điểm tích lũy).`, 'success');
+            renderStudentDashboard(session.userId);
+        });
+
+        // Render Bảng xếp hạng học sinh
+        function renderLeaderboard(students, currentStudentId) {
+            const tbody = document.getElementById('leaderboard-body');
+            const sorted = [...students].sort((a, b) => b.totalPoints - a.totalPoints || b.totalKm - a.totalKm);
+
+            if (sorted.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="py-6 text-center text-slate-400 text-xs">Chưa có dữ liệu xếp hạng.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = sorted.slice(0, 15).map((stu, index) => {
+                const rank = index + 1;
+                const isMe = stu.id === currentStudentId;
+                let rankBadge = `<span class="font-bold text-slate-500">#${rank}</span>`;
+                if (rank === 1) rankBadge = `<span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-amber-100 text-amber-600 font-extrabold text-xs"><i class="fa-solid fa-crown"></i></span>`;
+                if (rank === 2) rankBadge = `<span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-slate-200 text-slate-700 font-extrabold text-xs">2</span>`;
+                if (rank === 3) rankBadge = `<span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-orange-100 text-orange-700 font-extrabold text-xs">3</span>`;
+
+                return `
+                    <tr class="${isMe ? 'bg-blue-50/70 font-semibold' : 'hover:bg-slate-50'} transition">
+                        <td class="py-3 px-4">${rankBadge}</td>
+                        <td class="py-3 px-4 text-slate-800">
+                            ${sanitizeHTML(stu.name)}
+                            ${isMe ? '<span class="ml-1.5 px-1.5 py-0.5 text-[10px] rounded bg-blue-600 text-white font-bold">Bạn</span>' : ''}
+                        </td>
+                        <td class="py-3 px-4"><span class="px-2 py-0.5 rounded bg-slate-100 text-slate-600 text-xs font-semibold">${sanitizeHTML(stu.className)}</span></td>
+                        <td class="py-3 px-4 text-right font-semibold text-emerald-600">${stu.totalKm.toFixed(1)} km</td>
+                        <td class="py-3 px-4 text-right font-extrabold text-orange-600">${stu.totalPoints}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // Render Lịch sử cá nhân
+        function renderStudentHistory(student) {
+            const container = document.getElementById('student-history-list');
+            const history = student.history || [];
+
+            if (history.length === 0) {
+                container.innerHTML = `<p class="text-center text-slate-400 text-xs py-8">Chưa có lịch sử hoạt động nào.</p>`;
+                return;
+            }
+
+            container.innerHTML = history.slice(0, 20).map(item => {
+                let iconHtml = '<i class="fa-solid fa-circle-info text-blue-500"></i>';
+                let bgClass = 'bg-blue-50';
+                if (item.type === 'checkin') {
+                    iconHtml = '<i class="fa-solid fa-calendar-check text-indigo-600"></i>';
+                    bgClass = 'bg-indigo-50';
+                } else if (item.type === 'run') {
+                    iconHtml = '<i class="fa-solid fa-person-running text-emerald-600"></i>';
+                    bgClass = 'bg-emerald-50';
+                }
+
+                return `
+                    <div class="flex items-start gap-3 p-3 rounded-xl border border-slate-100 bg-slate-50/50">
+                        <div class="w-8 h-8 rounded-lg ${bgClass} flex items-center justify-center shrink-0 mt-0.5">
+                            ${iconHtml}
+                        </div>
+                        <div class="min-w-0 flex-grow">
+                            <p class="text-xs font-semibold text-slate-800 leading-snug">${sanitizeHTML(item.desc)}</p>
+                            <p class="text-[11px] text-slate-400 mt-0.5">${formatDateVN(item.date)}</p>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        /**
+         * CHỨC NĂNG QUẢN TRỊ VIÊN
+         */
+        function renderAdminDashboard(adminUsername = 'Quản trị viên') {
+            document.getElementById('nav-user-name').textContent = `Quản trị viên (${adminUsername})`;
+            document.getElementById('nav-user-role').textContent = 'Ban Quản Trị • THPT Tân Thạnh';
+
+            const students = getStudents();
+            const today = getTodayISO();
+
+            // Cập nhật thống kê tổng quan
+            const totalStudents = students.length;
+            const todayCheckins = students.filter(s => s.lastCheckinDate === today).length;
+            const totalKm = students.reduce((sum, s) => sum + (s.totalKm || 0), 0);
+            const totalPoints = students.reduce((sum, s) => sum + (s.totalPoints || 0), 0);
+
+            document.getElementById('admin-stat-students').textContent = totalStudents;
+            document.getElementById('admin-stat-checkins').textContent = `${todayCheckins} / ${totalStudents}`;
+            document.getElementById('admin-stat-km').textContent = `${totalKm.toFixed(1)} km`;
+            document.getElementById('admin-stat-points').textContent = totalPoints.toLocaleString('vi-VN');
+
+            // Cập nhật danh sách lớp trong bộ lọc
+            const classSelect = document.getElementById('admin-filter-class');
+            const currentFilter = classSelect.value;
+            const uniqueClasses = [...new Set(students.map(s => s.className))].sort();
+
+            classSelect.innerHTML = '<option value="ALL">Tất cả các lớp</option>' +
+                uniqueClasses.map(c => `<option value="${sanitizeHTML(c)}">Lớp ${sanitizeHTML(c)}</option>`).join('');
+
+            if (uniqueClasses.includes(currentFilter)) {
+                classSelect.value = currentFilter;
+            }
+
+            renderAdminTable();
+        }
+
+        function renderAdminTable() {
+            const students = getStudents();
+            const today = getTodayISO();
+            const keyword = document.getElementById('admin-search-input').value.trim().toLowerCase();
+            const classFilter = document.getElementById('admin-filter-class').value;
+
+            const filtered = students.filter(s => {
+                const matchKeyword = s.name.toLowerCase().includes(keyword) || s.phone.includes(keyword);
+                const matchClass = classFilter === 'ALL' || s.className === classFilter;
+                return matchKeyword && matchClass;
+            });
+
+            const tbody = document.getElementById('admin-students-table');
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="py-8 text-center text-slate-400 text-sm">Không tìm thấy học sinh nào phù hợp với bộ lọc.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = filtered.map(stu => {
+                const isCheckedToday = stu.lastCheckinDate === today;
+                const statusHtml = isCheckedToday
+                    ? `<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700"><i class="fa-solid fa-check"></i> Đã điểm danh</span>`
+                    : `<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-500">Chưa điểm danh</span>`;
+
+                return `
+                    <tr class="hover:bg-slate-50 transition">
+                        <td class="py-3.5 px-4 font-bold text-slate-800">${sanitizeHTML(stu.name)}</td>
+                        <td class="py-3.5 px-4"><span class="px-2.5 py-1 rounded-lg bg-blue-50 text-blue-700 text-xs font-bold">${sanitizeHTML(stu.className)}</span></td>
+                        <td class="py-3.5 px-4 text-slate-600 font-mono text-xs">${sanitizeHTML(stu.phone)}</td>
+                        <td class="py-3.5 px-4 text-center">${statusHtml}</td>
+                        <td class="py-3.5 px-4 text-right font-bold text-emerald-600">${stu.totalKm.toFixed(1)} km</td>
+                        <td class="py-3.5 px-4 text-right font-extrabold text-orange-600">${stu.totalPoints}</td>
+                        <td class="py-3.5 px-4 text-center">
+                            <div class="inline-flex items-center gap-1.5">
+                                <button onclick="openEditModal('${stu.id}')" title="Chỉnh sửa thông tin" class="p-2 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-600 transition">
+                                    <i class="fa-solid fa-pen-to-square"></i>
+                                </button>
+                                <button onclick="confirmDeleteStudent('${stu.id}', '${sanitizeHTML(stu.name)}')" title="Xóa tài khoản" class="p-2 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 transition">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // Mở Modal chỉnh sửa học sinh
+        function openEditModal(studentId) {
+            const students = getStudents();
+            const stu = students.find(s => s.id === studentId);
+            if (!stu) return;
+
+            document.getElementById('edit-student-id').value = stu.id;
+            document.getElementById('edit-name').value = stu.name;
+            document.getElementById('edit-class').value = stu.className;
+            document.getElementById('edit-phone').value = stu.phone;
+            document.getElementById('edit-km').value = stu.totalKm;
+            document.getElementById('edit-points').value = stu.totalPoints;
+
+            const modal = document.getElementById('edit-student-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeEditModal() {
+            const modal = document.getElementById('edit-student-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        // Lưu thông tin chỉnh sửa học sinh
+        document.getElementById('edit-student-form').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const id = document.getElementById('edit-student-id').value;
+            const name = document.getElementById('edit-name').value.trim();
+            const className = document.getElementById('edit-class').value.trim().toUpperCase();
+            const phone = document.getElementById('edit-phone').value.trim();
+            const km = parseFloat(document.getElementById('edit-km').value) || 0;
+            const points = parseInt(document.getElementById('edit-points').value, 10) || 0;
+
+            const students = getStudents();
+            const idx = students.findIndex(s => s.id === id);
+            if (idx === -1) return;
+
+            // Kiểm tra trùng SĐT với học sinh khác
+            if (students.some((s, i) => i !== idx && s.phone === phone)) {
+                showToast('Số điện thoại này đã thuộc về học sinh khác!', 'error');
+                return;
+            }
+
+            students[idx].name = name;
+            students[idx].className = className;
+            students[idx].phone = phone;
+            students[idx].totalKm = Math.round(km * 10) / 10;
+            students[idx].totalPoints = points;
+
+            saveStudents(students);
+            closeEditModal();
+            showToast('Đã cập nhật thông tin học sinh thành công!', 'success');
+            const session = getSession();
+            renderAdminDashboard(session ? session.username : 'Quản trị viên');
+        });
+
+        // Xác nhận xóa học sinh
+        function confirmDeleteStudent(studentId, studentName) {
+            showConfirmDialog(
+                'Xóa tài khoản học sinh',
+                `Bạn có chắc chắn muốn xóa toàn bộ dữ liệu và tài khoản của học sinh "${studentName}"? Hành động này không thể hoàn tác.`,
+                () => {
+                    const students = getStudents().filter(s => s.id !== studentId);
+                    saveStudents(students);
+                    showToast(`Đã xóa tài khoản học sinh ${studentName}.`, 'info');
+                    const session = getSession();
+                    renderAdminDashboard(session ? session.username : 'Quản trị viên');
+                }
+            );
+        }
+
+        // Xác nhận Reset điểm toàn trường
+        function confirmResetAllPoints() {
+            showConfirmDialog(
+                'Reset Điểm & Km Toàn Trường',
+                'Thao tác này sẽ đưa Tổng Km và Tổng Điểm của TẤT CẢ học sinh về 0 để bắt đầu đợt thi đua mới (vẫn giữ lại tài khoản học sinh). Bạn có muốn tiếp tục?',
+                () => {
+                    const today = getTodayISO();
+                    const students = getStudents().map(s => ({
+                        ...s,
+                        totalKm: 0,
+                        totalPoints: 0,
+                        lastCheckinDate: '',
+                        dailyKmMap: {},
+                        history: [{ date: today, type: 'info', desc: 'Quản trị viên reset điểm cho đợt thi đua mới' }]
+                    }));
+                    saveStudents(students);
+                    showToast('Đã reset toàn bộ điểm thi đua về 0!', 'success');
+                    const session = getSession();
+                    renderAdminDashboard(session ? session.username : 'Quản trị viên');
+                }
+            );
+        }
+
+        // Xuất dữ liệu ra file CSV hoặc JSON
+        function exportData(format) {
+            const students = getStudents();
+            if (students.length === 0) {
+                showToast('Không có dữ liệu học sinh để xuất!', 'warning');
+                return;
+            }
+
+            const today = getTodayISO();
+            let content = '';
+            let mimeType = '';
+            let filename = '';
+
+            if (format === 'csv') {
+                // Thêm BOM UTF-8 để Excel hiển thị tiếng Việt có dấu chuẩn xác
+                const BOM = '\uFEFF';
+                const headers = ['STT', 'Họ và tên', 'Lớp', 'Trường', 'Số điện thoại', 'Tổng Km', 'Tổng Điểm (Không đổi quà)', 'Điểm danh hôm nay'];
+                const rows = students.map((s, i) => [
+                    i + 1,
+                    `"${s.name.replace(/"/g, '""')}"`,
+                    `"${s.className}"`,
+                    `"${s.school}"`,
+                    `"${s.phone}"`,
+                    s.totalKm.toFixed(1),
+                    s.totalPoints,
+                    s.lastCheckinDate === today ? 'Đã điểm danh' : 'Chưa điểm danh'
+                ].join(','));
+
+                content = BOM + [headers.join(','), ...rows].join('\n');
+                mimeType = 'text/csv;charset=utf-8;';
+                filename = `BaoCao_ChayBo_THPT_TanThanh_${today}.csv`;
+            } else {
+                // Loại bỏ passwordHash khi xuất JSON để bảo mật
+                const safeData = students.map(({ passwordHash, ...rest }) => rest);
+                content = JSON.stringify(safeData, null, 2);
+                mimeType = 'application/json;charset=utf-8;';
+                filename = `SaoLuu_THPT_TanThanh_${today}.json`;
+            }
+
+            const blob = new Blob([content], { type: mimeType });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            showToast(`Đã tải xuống tệp ${filename}`, 'success');
+        }
+
+        /**
+         * ĐIỀU PHỐI HIỂN THỊ TOÀN BỘ ỨNG DỤNG
+         */
+        function renderApp() {
+            const session = getSession();
+            const authSection = document.getElementById('auth-section');
+            const studentDash = document.getElementById('student-dashboard');
+            const adminDash = document.getElementById('admin-dashboard');
+            const navUserArea = document.getElementById('nav-user-area');
+
+            authSection.classList.add('hidden');
+            studentDash.classList.add('hidden');
+            adminDash.classList.add('hidden');
+            navUserArea.classList.add('hidden');
+            navUserArea.classList.remove('flex');
+
+            if (!session) {
+                authSection.classList.remove('hidden');
+                checkLockoutUI();
+            } else if (session.role === 'student') {
+                studentDash.classList.remove('hidden');
+                navUserArea.classList.remove('hidden');
+                navUserArea.classList.add('flex');
+                renderStudentDashboard(session.userId);
+            } else if (session.role === 'admin') {
+                adminDash.classList.remove('hidden');
+                navUserArea.classList.remove('hidden');
+                navUserArea.classList.add('flex');
+                renderAdminDashboard(session.username);
+            }
+        }
+
+        // Khởi chạy ứng dụng khi tải trang
+        window.addEventListener('DOMContentLoaded', async () => {
+            // Tạo mã băm SHA-256 cho tất cả tài khoản quản trị viên
+            for (const admin of ADMIN_CREDENTIALS) {
+                admin.passwordHash = await sha256(admin.rawPassword);
+            }
+            await seedInitialDataIfEmpty();
+            renderApp();
+        });
+    </script>
+</body>
+</html>
